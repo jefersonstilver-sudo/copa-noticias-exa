@@ -527,6 +527,18 @@ img.fi {
 }
 .m-row.brazil-row .mtime { background: rgba(0,156,59,0.15); color: #FFDF00; }
 
+/* MATCHES SCROLL */
+.matches-scroll-wrap {
+  max-height: 800px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212,168,67,0.3) transparent;
+  padding-right: 6px;
+}
+.matches-scroll-wrap::-webkit-scrollbar { width: 5px; }
+.matches-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+.matches-scroll-wrap::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); border-radius: 3px; }
+
 /* ============================================================
    NEWS
    ============================================================ */
@@ -692,9 +704,10 @@ img.fi {
   .ticker-track { animation-duration: 120s; }
   .ticker-track span { font-size: 0.7rem; padding: 0 24px; }
 
-  /* NAVBAR: NOT fixed/sticky on mobile */
+  /* NAVBAR: not fixed, but TICKER stays fixed */
   .nav { position: static !important; top: auto !important; }
-  .ticker { position: static !important; }
+  .ticker { position: fixed !important; top: 0 !important; z-index: 100; width: 100%; }
+  .nav { margin-top: 36px; }
   .nav-links { display: none; }
   .nav-inner { height: 52px; }
   .nav-title { font-size: 0.7rem; letter-spacing: 2px; }
@@ -1011,6 +1024,8 @@ img.fi {
     <div class="section-title"><div class="pulse-dot"></div> PROXIMOS JOGOS</div>
     <div class="gradient-line"></div>
 
+    <div class="matches-scroll-wrap">
+
     <div class="day-header">&#127942; 11 de Junho &mdash; Jogo de Abertura</div>
     <div class="m-list">
       <div class="m-row"><div class="md">11/06 QUA</div><div class="mt r"><span>Mexico</span><span class="mf"><img src="https://flagcdn.com/w40/mx.png" class="fi" alt="MX"></span></div><div class="mx">VS</div><div class="mtime">13:00</div><div class="mx">A</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/za.png" class="fi" alt="ZA"></span><span>Africa do Sul</span></div><div class="mvenue">Azteca, Mexico</div></div>
@@ -1018,7 +1033,9 @@ img.fi {
 
     <div class="day-header">12 de Junho</div>
     <div class="m-list">
+      <div class="m-row"><div class="md">12/06 QUI</div><div class="mt r"><span>Canada</span><span class="mf"><img src="https://flagcdn.com/w40/ca.png" class="fi" alt="CA"></span></div><div class="mx">VS</div><div class="mtime">13:00</div><div class="mx">B</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/ba.png" class="fi" alt="BA"></span><span>Bosnia</span></div><div class="mvenue">Toronto</div></div>
       <div class="m-row"><div class="md">12/06 QUI</div><div class="mt r"><span>EUA</span><span class="mf"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></span></div><div class="mx">VS</div><div class="mtime">22:00</div><div class="mx">D</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/tr.png" class="fi" alt="TR"></span><span>Turquia</span></div><div class="mvenue">SoFi, Los Angeles</div></div>
+      <div class="m-row"><div class="md">12/06 QUI</div><div class="mt r"><span>Holanda</span><span class="mf"><img src="https://flagcdn.com/w40/nl.png" class="fi" alt="NL"></span></div><div class="mx">VS</div><div class="mtime">16:00</div><div class="mx">F</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/se.png" class="fi" alt="SE"></span><span>Suecia</span></div><div class="mvenue">Dallas</div></div>
     </div>
 
     <div class="day-header"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"> 13 de Junho &mdash; Estreia do Brasil</div>
@@ -1026,6 +1043,7 @@ img.fi {
       <div class="m-row brazil-row"><div class="md" style="color:#FFDF00;font-weight:800;">13/06 SEX</div><div class="mt r"><span style="font-weight:800;">Brasil</span><span class="mf"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"></span></div><div class="mx">VS</div><div class="mtime">19:00</div><div class="mx">C</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/ma.png" class="fi" alt="MA"></span><span>Marrocos</span></div><div class="mvenue">MetLife, Nova Jersey</div></div>
       <div class="m-row"><div class="md">13/06 SEX</div><div class="mt r"><span>Alemanha</span><span class="mf"><img src="https://flagcdn.com/w40/de.png" class="fi" alt="DE"></span></div><div class="mx">VS</div><div class="mtime">16:00</div><div class="mx">E</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/ci.png" class="fi" alt="CI"></span><span>Costa do Marfim</span></div><div class="mvenue">Atlanta</div></div>
       <div class="m-row"><div class="md">13/06 SEX</div><div class="mt r"><span>Argentina</span><span class="mf"><img src="https://flagcdn.com/w40/ar.png" class="fi" alt="AR"></span></div><div class="mx">VS</div><div class="mtime">22:00</div><div class="mx">J</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/dz.png" class="fi" alt="DZ"></span><span>Argelia</span></div><div class="mvenue">Hard Rock, Miami</div></div>
+      <div class="m-row"><div class="md">13/06 SEX</div><div class="mt r"><span>Belgica</span><span class="mf"><img src="https://flagcdn.com/w40/be.png" class="fi" alt="BE"></span></div><div class="mx">VS</div><div class="mtime">13:00</div><div class="mx">G</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/eg.png" class="fi" alt="EG"></span><span>Egito</span></div><div class="mvenue">Philadelphia</div></div>
     </div>
 
     <div class="day-header">14 de Junho</div>
@@ -1036,7 +1054,69 @@ img.fi {
       <div class="m-row"><div class="md">14/06 SAB</div><div class="mt r"><span>Portugal</span><span class="mf"><img src="https://flagcdn.com/w40/pt.png" class="fi" alt="PT"></span></div><div class="mx">VS</div><div class="mtime">13:00</div><div class="mx">K</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/cd.png" class="fi" alt="CD"></span><span>RD Congo</span></div><div class="mvenue">Dallas</div></div>
     </div>
 
-    <div style="text-align:center;margin-top:32px;">
+    <div class="day-header">15 de Junho</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">15/06 DOM</div><div class="mt r"><span>Coreia do Sul</span><span class="mf"><img src="https://flagcdn.com/w40/kr.png" class="fi" alt="KR"></span></div><div class="mx">VS</div><div class="mtime">16:00</div><div class="mx">A</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/cz.png" class="fi" alt="CZ"></span><span>Tchequia</span></div><div class="mvenue">Guadalajara</div></div>
+      <div class="m-row"><div class="md">15/06 DOM</div><div class="mt r"><span>Qatar</span><span class="mf"><img src="https://flagcdn.com/w40/qa.png" class="fi" alt="QA"></span></div><div class="mx">VS</div><div class="mtime">19:00</div><div class="mx">B</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/ch.png" class="fi" alt="CH"></span><span>Suica</span></div><div class="mvenue">Vancouver</div></div>
+      <div class="m-row"><div class="md">15/06 DOM</div><div class="mt r"><span>Paraguai</span><span class="mf"><img src="https://flagcdn.com/w40/py.png" class="fi" alt="PY"></span></div><div class="mx">VS</div><div class="mtime">22:00</div><div class="mx">D</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/au.png" class="fi" alt="AU"></span><span>Australia</span></div><div class="mvenue">Houston</div></div>
+      <div class="m-row"><div class="md">15/06 DOM</div><div class="mt r"><span>Equador</span><span class="mf"><img src="https://flagcdn.com/w40/ec.png" class="fi" alt="EC"></span></div><div class="mx">VS</div><div class="mtime">13:00</div><div class="mx">E</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/cw.png" class="fi" alt="CW"></span><span>Curacao</span></div><div class="mvenue">Kansas City</div></div>
+    </div>
+
+    <div class="day-header">16 de Junho</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">16/06 SEG</div><div class="mt r"><span>Tunisia</span><span class="mf"><img src="https://flagcdn.com/w40/tn.png" class="fi" alt="TN"></span></div><div class="mx">VS</div><div class="mtime">16:00</div><div class="mx">F</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/jp.png" class="fi" alt="JP"></span><span>Japao</span></div><div class="mvenue">Seattle</div></div>
+      <div class="m-row"><div class="md">16/06 SEG</div><div class="mt r"><span>Ira</span><span class="mf"><img src="https://flagcdn.com/w40/ir.png" class="fi" alt="IR"></span></div><div class="mx">VS</div><div class="mtime">19:00</div><div class="mx">G</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/nz.png" class="fi" alt="NZ"></span><span>Nova Zelandia</span></div><div class="mvenue">San Francisco</div></div>
+      <div class="m-row"><div class="md">16/06 SEG</div><div class="mt r"><span>Uruguai</span><span class="mf"><img src="https://flagcdn.com/w40/uy.png" class="fi" alt="UY"></span></div><div class="mx">VS</div><div class="mtime">22:00</div><div class="mx">H</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/cv.png" class="fi" alt="CV"></span><span>Cabo Verde</span></div><div class="mvenue">Dallas</div></div>
+    </div>
+
+    <div class="day-header">17 de Junho</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">17/06 TER</div><div class="mt r"><span>Iraque</span><span class="mf"><img src="https://flagcdn.com/w40/iq.png" class="fi" alt="IQ"></span></div><div class="mx">VS</div><div class="mtime">16:00</div><div class="mx">I</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/no.png" class="fi" alt="NO"></span><span>Noruega</span></div><div class="mvenue">Atlanta</div></div>
+      <div class="m-row"><div class="md">17/06 TER</div><div class="mt r"><span>Austria</span><span class="mf"><img src="https://flagcdn.com/w40/at.png" class="fi" alt="AT"></span></div><div class="mx">VS</div><div class="mtime">19:00</div><div class="mx">J</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/jo.png" class="fi" alt="JO"></span><span>Jordania</span></div><div class="mvenue">Miami</div></div>
+      <div class="m-row"><div class="md">17/06 TER</div><div class="mt r"><span>Uzbequistao</span><span class="mf"><img src="https://flagcdn.com/w40/uz.png" class="fi" alt="UZ"></span></div><div class="mx">VS</div><div class="mtime">22:00</div><div class="mx">K</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/co.png" class="fi" alt="CO"></span><span>Colombia</span></div><div class="mvenue">San Francisco</div></div>
+      <div class="m-row"><div class="md">17/06 TER</div><div class="mt r"><span>Gana</span><span class="mf"><img src="https://flagcdn.com/w40/gh.png" class="fi" alt="GH"></span></div><div class="mx">VS</div><div class="mtime">13:00</div><div class="mx">L</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/pa.png" class="fi" alt="PA"></span><span>Panama</span></div><div class="mvenue">Monterrey</div></div>
+    </div>
+
+    <div class="day-header"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"> 19 de Junho &mdash; Brasil Jogo 2</div>
+    <div class="m-list">
+      <div class="m-row brazil-row"><div class="md" style="color:#FFDF00;font-weight:800;">19/06 QUI</div><div class="mt r"><span style="font-weight:800;">Brasil</span><span class="mf"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"></span></div><div class="mx">VS</div><div class="mtime">21:30</div><div class="mx">C</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/ht.png" class="fi" alt="HT"></span><span>Haiti</span></div><div class="mvenue">Lincoln Financial, Philadelphia</div></div>
+    </div>
+
+    <div class="day-header"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"> 24 de Junho &mdash; Brasil Jogo 3</div>
+    <div class="m-list">
+      <div class="m-row brazil-row"><div class="md" style="color:#FFDF00;font-weight:800;">24/06 TER</div><div class="mt r"><span style="font-weight:800;">Escocia</span><span class="mf"><img src="https://flagcdn.com/w40/gb-sct.png" class="fi" alt="SCT"></span></div><div class="mx">VS</div><div class="mtime">19:00</div><div class="mx">C</div><div class="mt"><span class="mf"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"></span><span style="font-weight:800;">Brasil</span></div><div class="mvenue">Hard Rock Stadium, Miami</div></div>
+    </div>
+
+    <div class="day-header" style="color:var(--gold);">&#127942; 28 Jun - 2 Jul &mdash; Oitavas de Final</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">28/06 - 02/07</div><div class="mt r"><span>1A</span></div><div class="mx">VS</div><div class="mtime">TBD</div><div class="mx">OF</div><div class="mt"><span>2B</span></div><div class="mvenue">16 jogos em 5 dias</div></div>
+      <div class="m-row"><div class="md">Se classificar em 1o do Grupo C</div><div class="mt r"><span style="font-weight:700;color:#FFDF00;">Brasil</span><span class="mf"><img src="https://flagcdn.com/w40/br.png" class="fi" alt="BR"></span></div><div class="mx">VS</div><div class="mtime">30/06</div><div class="mx">OF</div><div class="mt"><span>2o Grupo D</span></div><div class="mvenue">A definir</div></div>
+    </div>
+
+    <div class="day-header" style="color:var(--gold);">&#127942; 4 - 6 Jul &mdash; Quartas de Final</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">04/07 - 06/07</div><div class="mt r"><span>Venc. OF1</span></div><div class="mx">VS</div><div class="mtime">TBD</div><div class="mx">QF</div><div class="mt"><span>Venc. OF2</span></div><div class="mvenue">4 jogos &bull; Sedes TBD</div></div>
+    </div>
+
+    <div class="day-header" style="color:var(--gold);">&#127942; 8 - 9 Jul &mdash; Semifinais</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">08/07 TER</div><div class="mt r"><span>Semifinal 1</span></div><div class="mx">VS</div><div class="mtime">TBD</div><div class="mx">SF</div><div class="mt"><span>Semifinal 1</span></div><div class="mvenue">A definir</div></div>
+      <div class="m-row"><div class="md">09/07 QUA</div><div class="mt r"><span>Semifinal 2</span></div><div class="mx">VS</div><div class="mtime">TBD</div><div class="mx">SF</div><div class="mt"><span>Semifinal 2</span></div><div class="mvenue">A definir</div></div>
+    </div>
+
+    <div class="day-header" style="color:var(--red);font-size:1.4rem;">&#127942; 13 Jul &mdash; Disputa de 3o Lugar</div>
+    <div class="m-list">
+      <div class="m-row"><div class="md">13/07 DOM</div><div class="mt r"><span>3o Lugar</span></div><div class="mx">VS</div><div class="mtime">16:00</div><div class="mx">3o</div><div class="mt"><span>3o Lugar</span></div><div class="mvenue">Hard Rock Stadium, Miami</div></div>
+    </div>
+
+    <div class="day-header" style="color:#FFDF00;font-size:1.6rem;border-bottom-color:rgba(255,223,0,0.3);">&#127942; 19 de Julho &mdash; GRANDE FINAL</div>
+    <div class="m-list">
+      <div class="m-row" style="border-color:rgba(255,223,0,0.4);background:rgba(255,223,0,0.04);"><div class="md" style="color:#FFDF00;font-weight:900;font-size:0.85rem;">19/07 SAB &bull; FINAL</div><div class="mt r"><span style="font-weight:900;">Finalista 1</span></div><div class="mx" style="color:#FFDF00;">VS</div><div class="mtime" style="background:rgba(255,223,0,0.15);color:#FFDF00;">21:00</div><div class="mx">F</div><div class="mt"><span style="font-weight:900;">Finalista 2</span></div><div class="mvenue" style="color:var(--gold);">MetLife Stadium, Nova Jersey &bull; 82.500</div></div>
+    </div>
+
+    </div><!-- /matches-scroll-wrap -->
+
+    <div style="text-align:center;margin-top:24px;">
       <a href="https://www.fifa.com/pt/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;padding:14px 32px;border:1px solid var(--border);border-radius:30px;font-size:0.82rem;font-weight:600;color:var(--t2);transition:var(--tr);background:var(--bg-card);" onmouseover="this.style.borderColor='rgba(229,9,20,0.4)';this.style.color='#fff'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--t2)'">
         Ver todos os 104 jogos no FIFA.com &rarr;
       </a>
