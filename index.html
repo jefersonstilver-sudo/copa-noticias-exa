@@ -651,12 +651,27 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
   var NEWS_API = '/api/news';
   var REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min
   var newsLoaded = false;
+  var NEWS_VERSION = 3; // bump to bust cache
 
   function esc(s) {
     if (!s) return '';
     var d = document.createElement('div');
     d.textContent = s;
     return d.innerHTML;
+  }
+
+  // Strip any HTML tags and raw URLs from text (safety net)
+  function cleanText(s) {
+    if (!s) return '';
+    return s
+      .replace(/<[^>]*>/g, '')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   function timeAgo(iso) {
@@ -682,7 +697,7 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     var ticker = document.getElementById('ticker');
     if (!ticker || articles.length === 0) return;
     var spans = articles.slice(0, 12).map(function(a) {
-      return '<span>' + esc(a.source).toUpperCase() + ': ' + esc(a.title) + '</span>';
+      return '<span>' + esc(a.source).toUpperCase() + ': ' + esc(cleanText(a.title)) + '</span>';
     }).join('');
     // Duplicate for seamless infinite scroll
     ticker.innerHTML = spans + spans;
@@ -701,9 +716,9 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     var img = card.querySelector('.fc-img img');
     if (img) { img.src = article.image; img.onerror = function(){ imgErr(this); }; }
     var title = card.querySelector('.fc-title');
-    if (title) title.textContent = article.title;
+    if (title) title.textContent = cleanText(article.title);
     var sub = card.querySelector('.fc-sub');
-    if (sub) sub.textContent = article.description;
+    if (sub) sub.textContent = cleanText(article.description);
     var meta = card.querySelector('.fc-meta');
     if (meta) meta.textContent = article.source + ' \u2022 ' + timeAgo(article.publishedAt);
   }
@@ -744,7 +759,7 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
 
   async function loadNews() {
     try {
-      var res = await fetch(NEWS_API);
+      var res = await fetch(NEWS_API + '?v=' + NEWS_VERSION + '&t=' + Math.floor(Date.now()/300000));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
 

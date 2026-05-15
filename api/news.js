@@ -112,8 +112,9 @@ async function fetchGoogleNews() {
         const imgMatch = desc.match(/src="(https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i);
         const image = imgMatch ? imgMatch[1] : null;
 
-        // Clean description: strip all HTML tags and entities
-        const cleanDesc = stripHtml(desc);
+        // Google News descriptions are HTML lists of related articles — not useful
+        // Generate a clean description from the title + source instead
+        const cleanDesc = title.length > 60 ? title : (title + ' — ' + (sourceName || 'Google News'));
 
         articles.push({
           title,
@@ -276,7 +277,7 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=300');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=600');
 
   if (cache.data && Date.now() - cache.ts < CACHE_TTL) {
     return res.status(200).json({ ...cache.data, cached: true });
