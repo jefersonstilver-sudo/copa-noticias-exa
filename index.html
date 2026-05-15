@@ -379,7 +379,7 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     </div>
     <div class="live-indicator">
       <span class="live-dot"></span>
-      <span>AO VIVO</span>
+      <span id="live-status">AO VIVO</span>
     </div>
   </div>
 </nav>
@@ -464,7 +464,7 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
      ============================================================ -->
 <section class="section" id="noticias">
   <div class="container fade-up">
-    <div class="section-title"><div class="pulse-dot"></div> TODAS AS NOTÍCIAS <span style="margin-left:auto;font-family:'Orbitron';font-size:0.58rem;font-weight:700;color:var(--green);letter-spacing:2px;">AUTO-UPDATE</span></div>
+    <div class="section-title"><div class="pulse-dot"></div> TODAS AS NOTÍCIAS <span style="margin-left:auto;font-family:'Orbitron';font-size:0.58rem;font-weight:700;color:var(--green);letter-spacing:2px;display:flex;align-items:center;gap:8px;"><span class="spin-icon"></span> <span id="source-count">carregando...</span> &bull; AUTO-UPDATE</span></div>
     <div class="gradient-line"></div>
     <div class="news-scroll-wrap">
     <div class="news-grid">
@@ -617,19 +617,174 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
 <script>
 (function(){
   'use strict';
+
+  // ============================================================
+  //  PARTICLES
+  // ============================================================
   var c=document.getElementById('particles'),ctx=c.getContext('2d'),W,H,p=[];
   function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
   resize();window.addEventListener('resize',resize);
   for(var i=0;i<50;i++){p.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,dx:(Math.random()-0.5)*0.35,dy:(Math.random()-0.5)*0.35,o:Math.random()*0.4+0.1,c:['rgba(229,9,20,','rgba(212,168,67,','rgba(26,109,212,','rgba(255,255,255,'][Math.floor(Math.random()*4)]});}
   function draw(){ctx.clearRect(0,0,W,H);for(var i=0;i<p.length;i++){var q=p[i];ctx.beginPath();ctx.arc(q.x,q.y,q.r,0,Math.PI*2);ctx.fillStyle=q.c+q.o+')';ctx.fill();q.x+=q.dx;q.y+=q.dy;if(q.x<0||q.x>W)q.dx*=-1;if(q.y<0||q.y>H)q.dy*=-1;}for(var i=0;i<p.length;i++){for(var j=i+1;j<p.length;j++){var dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<140){ctx.beginPath();ctx.moveTo(p[i].x,p[i].y);ctx.lineTo(p[j].x,p[j].y);ctx.strokeStyle='rgba(255,255,255,'+(0.03*(1-d/140))+')';ctx.stroke();}}}requestAnimationFrame(draw);}
   draw();
+
+  // ============================================================
+  //  COUNTDOWN
+  // ============================================================
   var COPA=new Date('2026-06-11T17:00:00Z');
   function cd(){var d=COPA-new Date();if(d<0)d=0;document.getElementById('cd-d').textContent=Math.floor(d/864e5);document.getElementById('cd-h').textContent=String(Math.floor(d%864e5/36e5)).padStart(2,'0');document.getElementById('cd-m').textContent=String(Math.floor(d%36e5/6e4)).padStart(2,'0');document.getElementById('cd-s').textContent=String(Math.floor(d%6e4/1e3)).padStart(2,'0');}
   cd();setInterval(cd,1000);
-  document.getElementById('ts').textContent=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+  // ============================================================
+  //  SCROLL REVEAL
+  // ============================================================
   var obs=new IntersectionObserver(function(e){e.forEach(function(en){if(en.isIntersecting){en.target.classList.add('vis');obs.unobserve(en.target);}});},{threshold:0.08});
   document.querySelectorAll('.fade-up').forEach(function(el){obs.observe(el);});
   document.querySelectorAll('.nav-links a').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth',block:'start'});});});
+
+  // ============================================================
+  //  LIVE NEWS SYSTEM
+  // ============================================================
+  var NEWS_API = '/api/news';
+  var REFRESH_INTERVAL = 5 * 60 * 1000; // 5 min
+  var newsLoaded = false;
+
+  function esc(s) {
+    if (!s) return '';
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function timeAgo(iso) {
+    var diff = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Agora';
+    if (mins < 60) return 'H\u00e1 ' + mins + ' min';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return 'H\u00e1 ' + hrs + 'h';
+    var days = Math.floor(hrs / 24);
+    return 'H\u00e1 ' + days + ' dia' + (days > 1 ? 's' : '');
+  }
+
+  function updateTimestamp(iso) {
+    var el = document.getElementById('ts');
+    if (el) el.textContent = new Date(iso).toLocaleString('pt-BR', {
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+  }
+
+  function updateTicker(articles) {
+    var ticker = document.getElementById('ticker');
+    if (!ticker || articles.length === 0) return;
+    var spans = articles.slice(0, 12).map(function(a) {
+      return '<span>' + esc(a.source).toUpperCase() + ': ' + esc(a.title) + '</span>';
+    }).join('');
+    // Duplicate for seamless infinite scroll
+    ticker.innerHTML = spans + spans;
+  }
+
+  function updateFeatured(article) {
+    var card = document.querySelector('.featured-card');
+    if (!card || !article) return;
+    card.setAttribute('href', article.url);
+    var img = card.querySelector('.fc-img img');
+    if (img) img.src = article.image;
+    var title = card.querySelector('.fc-title');
+    if (title) title.textContent = article.title;
+    var sub = card.querySelector('.fc-sub');
+    if (sub) sub.textContent = article.description;
+    var meta = card.querySelector('.fc-meta');
+    if (meta) meta.textContent = article.source + ' \u2022 ' + timeAgo(article.publishedAt);
+  }
+
+  function updateHeadlines(articles) {
+    var strip = document.querySelector('.headline-strip');
+    if (!strip || articles.length === 0) return;
+    strip.innerHTML = articles.map(function(a, i) {
+      return '<a class="hl-card" href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
+        '<img class="hl-img" src="' + esc(a.image) + '" alt="" loading="lazy" onerror="this.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\';">' +
+        '<div class="hl-body"><div class="hl-src">' +
+        (i < 3 ? '<span class="new-tag">NOVO</span> ' : '') +
+        esc(a.source) + '</div><div class="hl-title">' + esc(a.title) + '</div></div></a>';
+    }).join('');
+  }
+
+  function updateNewsGrid(articles) {
+    var grid = document.querySelector('.news-grid');
+    if (!grid || articles.length === 0) return;
+    grid.innerHTML = articles.map(function(a) {
+      return '<a class="n-card" href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
+        '<div class="n-img-wrap"><img class="n-img" src="' + esc(a.image) + '" alt="" loading="lazy" ' +
+        'onerror="this.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\';this.style.objectFit=\'none\';"></div>' +
+        '<div class="n-body"><div class="n-src">' + esc(a.source) + '</div>' +
+        '<div class="n-title">' + esc(a.title) + '</div>' +
+        '<div class="n-meta">' + timeAgo(a.publishedAt) + '</div></div></a>';
+    }).join('');
+  }
+
+  function updateSourceBadge(sources) {
+    var el = document.getElementById('source-count');
+    if (el) {
+      var total = (sources.google || 0) + (sources.newsdata || 0) + (sources.gnews || 0);
+      el.textContent = total + ' fontes';
+    }
+  }
+
+  async function loadNews() {
+    try {
+      var res = await fetch(NEWS_API);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      var data = await res.json();
+
+      if (!data.articles || data.articles.length === 0) {
+        console.warn('[Central Copa] API retornou 0 artigos');
+        return;
+      }
+
+      // Update all dynamic sections
+      updateTicker(data.articles);
+      updateFeatured(data.articles[0]);
+      updateHeadlines(data.articles.slice(1, 6));
+      updateNewsGrid(data.articles.slice(0, 30));
+      updateTimestamp(data.updatedAt);
+      updateSourceBadge(data.sources);
+
+      // Mark as loaded — add live indicator
+      if (!newsLoaded) {
+        var live = document.getElementById('live-status');
+        if (live) {
+          live.textContent = 'AO VIVO';
+          live.style.color = '#ff4444';
+        }
+        newsLoaded = true;
+      }
+
+      console.log(
+        '[Central Copa] ' + data.count + ' noticias carregadas | ' +
+        'Google: ' + data.sources.google + ', NewsData: ' + data.sources.newsdata +
+        ', GNews: ' + data.sources.gnews +
+        (data.cached ? ' (cache)' : ' (fresh)')
+      );
+    } catch (e) {
+      console.warn('[Central Copa] Falha ao carregar noticias:', e.message);
+      // Static fallback content remains visible
+      updateTimestamp(new Date().toISOString());
+    }
+  }
+
+  // Initial load
+  loadNews();
+
+  // Auto-refresh every 5 minutes
+  setInterval(loadNews, REFRESH_INTERVAL);
+
+  // Also refresh when tab becomes visible again
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) loadNews();
+  });
+
 })();
 </script>
 </body>
