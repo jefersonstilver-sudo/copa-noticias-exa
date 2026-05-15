@@ -1,0 +1,82 @@
+======================================================================
+  RELATÓRIO DE NOTÍCIAS - VÍDEO DOOH COPA 2026
+  Data: 15 de Maio de 2026
+  Horário: 18:23 BRT
+  Gerado por: EXA Soluções - Sistema Automatizado
+======================================================================
+
+VÍDEO GERADO
+----------------------------------------------------------------------
+  Arquivo HTML:    copa-2026-15-mai-18h.html
+  Resolução:       1920x1080 (horizontal)
+  Duração:         10 segundos
+  Formato final:   MP4 (a ser gravado via Puppeteer/Playwright)
+
+NOTÍCIAS INCLUÍDAS NO VÍDEO (10)
+----------------------------------------------------------------------
+  1. Acompanhe todas as convocações para a Copa do Mundo 2026
+     Fonte: Lance!
+     URL: https://news.google.com/rss/articles/CBMiogFBVV95cUxOUU16S3pkV1FTLUZGc1hLOVc3dW8tN0RlTnNlS2V0Z3JsZzI3OE5zZWhBWlNFTGllV2RqZGZKcjdUZWdnN0FyVmJkZEFuZ3pVVTlhRUlOakxxb0hDaVJpaERrQUF0Yy16aWJfWU1TUnczWkxEbUhTRy1UNGxfcUZCbnVnMjY1RE9ORGhtUHI5bDlpR2ZWTWMyN0U0eHRZTXZlenc?oc=5
+     Publicado: 15/05/2026, 18:11:45
+
+  2. Shakira lança 'Dai Dai', música oficial da Copa do Mundo 2026; veja o clipe
+     Fonte: Folha de S.Paulo
+     URL: https://news.google.com/rss/articles/CBMiwwFBVV95cUxQbFNqcERnNFIxUFFKekVad2Z1MTZiVnd1UFk0OGl5OXA1T2JyOEZHY0w4RE51WjJoc3NVSnNDS1ZLWDRkVEQ3d2ZHZUY2WHdxRm9EaXRUelNQejhPcnF4ZWR3ZkpWbXV6WVQ3UVZrLXBfaE0tLVhDZkI0VmxLN09PVW1CNzc0LUlraFJXZUs1bHNiY2prRURLaXRFQnlaVWZ4V0RISVNkRUlNN2h4c3VmNHVPODNjQWp5MGNlRS1sdUlNcW_SAcgBQVVfeXFMTnN3eGZTSFlmRU1aa21jaVE3dVZfN2Z1VHd4ZTZzdGRjQnl5MHZYUmtJTzd3OXBkRGlCYTFSN1dGMlg1TlBXSUNFNjU0eklYeGJzc2pKSVQ1MFRtN3hZWTBKT3VDZHJEWDlpS0U2VDJsYU9vOVB1MDdCcGxma0tpdFRVZklIWGZtbFlpVjRQMTJtLThnZVZvWm85VkRJOTFUUEhJRjZsYXo0OGtYUTEtdlktY194VUFBMXdrcWtsOVBvNDNRWUlxRzI?oc=5
+     Publicado: 15/05/2026, 17:43:00
+
+  3. Copa do Mundo 2026 | Recapitulando FC discute torneio além do futebol, assista
+     Fonte: Omelete
+     URL: https://news.google.com/rss/articles/CBMioAFBVV95cUxNeFJpckprS1ZDNkprVlpzSWJCNTN3b1Y2N3c5RGh6ODg3dG9BSDdKcy14NWVkMVM5XzUwMnNkWUdjVXZ5M0ppeVBIcnhVal8yQTVSS0xueUNId0tROC0tT2gwd056ZEVrRmc4akgyWHBGSDlnY3BnUTBoRUJxLXV6a2hzaGFodkgyQzlTaDB2ZnpoLWxnUnAyMVpsOENDVXBq?oc=5
+     Publicado: 15/05/2026, 17:19:00
+
+  4. Já saiu a convocação do Brasil para a Copa de 2026? Veja data e horário
+     Fonte: UOL
+     URL: https://news.google.com/rss/articles/CBMi2gFBVV95cUxNLUVvdEtoeTBCcDk5TGNiTmQ4VG43a0VjX1FkcHRaS0JLOUJaS1BDbGFIeUFuNnB1aXNlWUVUQk1IcUtLMUhyOGVhdDJ6SnZKUkpOZTZtMHlZYXpVczVMdkpBTlBPZVNvV0t3clpXTExsblQwaS1aOVFiZ01MNjA1WFgwVTlPTW5vbmZCR1dpcWE3cDNqdTNiemFydGl2TGJCYS00cndkMHNBM0czOXJzVkZDVlBkYjlGTUNZTGswOU9QMTNjT3B2d2VVcmtsRmYtWW5STVl2UFdaZw?oc=5
+     Publicado: 15/05/2026, 17:17:52
+
+  5. CEO do Ibope diz que Brasil confia em Ancelotti e cita ‘problema’ com indefinição de Neymar no SPIW
+     Fonte: Estadão
+     URL: https://news.google.com/rss/articles/CBMi2gFBVV95cUxPNlVaZ2ZxU0x1WHZvV2dXbzFJdlVZdUY4aEV5aWtqeHZ0M0tsYlJkTjk3czA2T1VIdk1UMW85N1RQb1ZMVTI5aVlXbk1aTDBxWVBoLTNyaEZYTnlmMFhQQXctVWJ4U3NKZG9oUVJXa3RocmNaaUJwSUk3Y3ZHVzVMOFhpelVkWkJ1VWtFbldBV0lleXpWUmdFYk5UMDhPSDJyZ2ZmMTdMeVZtMTd2TVNPZFBNdklNNVhJWGRvQkpiN05PTXM4LXZkdS01X3I1MFpXUlZiUEF5bjkzd9IB3wFBVV95cUxPV0dTek1VNkRTSW9rOGlfN3hVSFV6RFpldHNFeUo4aDRUdEZzYkR5WkVSeFI0bzZJd2dISjBCOFhKZ0h5cEdZY3lSNndPajNCZE9nYmM3cVJhek1kOHRqa1BiUWI5dk50V3Znb05VNnJGUDdoU080UkZGb2FUWWZaTy0yYlpFc2d5ODZsS0xDaEdBWTB3dFlvZ2VlSVBSVkg4M3BqTGpIWnA2bjJabXJoUzZ2VEVDSXBJeEJ1LTByakVtM3oxNE4xY0g5U1hRWjQwWHkwZ3BEelp0MWlsT1NN?oc=5
+     Publicado: 15/05/2026, 17:06:00
+
+  6. Incerteza na Copa, Neymar supera Ancelotti em confiança no país, diz Ibope
+     Fonte: UOL
+     URL: https://news.google.com/rss/articles/CBMi3AFBVV95cUxNZ3lpeDRsWUwzS2RoZ3NEa04yMlo2WExoN3dZNU5zNzlWYy1UMDVfRDAzTnRqUU5BX1hENC10X2M4RWtEbm1aZXlhMmF4T0JUdi05U2Flb0pYdjZoQkpCaUFZLU54aVkya0JCOHMzLXhON2RRTnRYZTdRTy11Z3p0OEhfZ2d1V0c5eDRhVnprLWdlVlh5dVRndFVrdHJQNGN0ODFhbHhyd01BVjZER3RxblNoR2pOTEZEOXBBVkp1cThjcUg3V2pYTGwzV0ttMkFyUk02Wi1ZVUw2Mkhh?oc=5
+     Publicado: 15/05/2026, 16:00:00
+
+  7. Neymar faz “último teste” antes de convocação de Ancelotti em jogo do Santos na Neo Química Arena
+     Fonte: Francês News
+     URL: https://news.google.com/rss/articles/CBMi3AFBVV95cUxPN2g5QkpPMkxqc0JNUTBYaWUtbXNrZ1VBSWlDeFZhOURyU1k0UllVbFRTMUJ2TW9pSW93N1lYQUp3YmF5ai1HU1VNWFdSaFJhaFBvMVM2ekRpdDhjZFVNa2JvVDYtWkI2cmFQdllqc2lIMXhqZUhuN1FMRUhEeGRaV3VZcGFiQTVEdm1HVHJxX296X3NnR3liT1N4bkQtNjlRSUFlTlV5ellwWnlRRmpvUDZ5dHF6WW9OaDRmd1dMTEVGYWlfc3JMX0NmdVl2YkZrcjhRZ3lUbVdrTkVI?oc=5
+     Publicado: 15/05/2026, 15:45:00
+
+  8. Grupo estatal chinês adquire direitos de transmissão da Copa do Mundo 2026
+     Fonte: Estadão
+     URL: https://news.google.com/rss/articles/CBMiuwFBVV95cUxNMzBnRVV1TmNlZ0FoU1VzV0dOVEh3Y3prcUJOMnJheWVJUWFiN2ttXzh6RkowR21ySXAxcEMtenN3dGxIOW9VT0lxUjVHamY0bXZOcm1ST3ZfZnNZNWY3UVJ1RFJoUHFwdDJKUHZmemZMLTc1YmhyRk1TMkFDODE0ejJwSV9LNFpReTFfZWotWlZnMDM3bkd0anNCTmtqcjhzZnI1dUg1SVdCd25XT09UbHZwdHFoSWUxR2h30gHAAUFVX3lxTE5Wcm01ekF1WnlLeGwteDZZS0trQ2pYS2x5R1dqNTF5VVg5bUFyalowaFh0eTVWak5LLXMzVi1aYmVPTlp1ZjhYNDhNb2tBajZLcmtCOXJDRzdIMFdOdGdodlI2RUpxM3g5MUkyOUk1Yng5ZFJNeDJLeGVfQ2gwQjJYQW5tWmZST2tSYTVIWVFDdGNNbFlKNzFRTHpVNEdqb181SG5GZ0VFMTRXUWd1Xy1oVVYtTlppRVJTT28wQ0lyeA?oc=5
+     Publicado: 15/05/2026, 15:35:00
+
+  9. Ancelotti recebe ‘garantia’ sobre Neymar antes da convocação do Brasil: ‘Seleção precisa dele’
+     Fonte: ND Mais
+     URL: https://news.google.com/rss/articles/CBMihwFBVV95cUxPNG1rRVNpQU5lR3FtRHdZY1hiREdZSWtGSjcxb2RId1huZXpVOUdUX0hGWm1EUE13di1SRXFmZ0VkM1FIVjV2NHdEUzR0X21fYVJIRkxhMDVlQUw0ajg1RWxQb1ZrOUMtTFlHbGxiREtRZXZEWmJTNHdEY1ptdEEtaUdidjhJekk?oc=5
+     Publicado: 15/05/2026, 14:31:36
+
+  10. Copa do Mundo 2026: veja quando sai a lista dos convocados para a Seleção Brasileira
+     Fonte: Folha Vitória
+     URL: https://news.google.com/rss/articles/CBMiwwFBVV95cUxNWXZkbU80TzZNRVJaazJwZV91UkRnYjh5ZExIS3RkSW5DOXhIMllaRlBiMnhic0xGeGFtdWlJVm5FY1BSVzVVSU01dFEyT3ExQW9FOE8ycmRCLWlsR2xmSEtmVzRTVndCUjZYaXlVSzAtQ2llQVVXSHVGY2NkcGRFRDRZZkF2d1pWYWlHVzJ0NzNHRlpvVHpBMWw4eWo2MnNfWUNabVY3aGZkUXplbk91Znl1b1ptVjE4aHRsVFJPNWVhTFU?oc=5
+     Publicado: 15/05/2026, 14:00:00
+
+FONTES CONSULTADAS
+----------------------------------------------------------------------
+  Google News RSS: 60 artigos
+  NewsData.io:     10 artigos
+  GNews.io:        10 artigos
+
+IMAGENS UTILIZADAS
+----------------------------------------------------------------------
+  Background: Estádio de futebol (Unsplash)
+  Bandeiras:  flagcdn.com/w40/ (CDN oficial)
+  Logo:       logo-exa-branca.png (EXA Mídia)
+
+======================================================================
+  Powered by EXA Soluções - Central Copa 2026
+  Gerado automaticamente em 15/05/2026 às 18:23 BRT
+======================================================================
