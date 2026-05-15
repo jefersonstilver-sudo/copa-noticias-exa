@@ -128,7 +128,7 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
 .headline-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; padding-bottom: 10px; }
 .hl-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--rs); overflow: hidden; cursor: pointer; transition: var(--tr); display: flex; flex-direction: column; }
 .hl-card:hover { border-color: rgba(229,9,20,0.3); transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
-.hl-card .hl-img { width: 100%; height: 110px; object-fit: cover; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+.hl-card .hl-img { width: 100%; height: 110px; object-fit: cover; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); display: block; }
 .hl-card .hl-body { padding: 12px; flex: 1; display: flex; flex-direction: column; }
 .hl-card .hl-src { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--red); margin-bottom: 6px; }
 .hl-card .hl-title { font-size: 0.78rem; font-weight: 700; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -147,9 +147,9 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
 .news-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .n-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; transition: var(--tr); cursor: pointer; }
 .n-card:hover { border-color: rgba(229,9,20,0.3); transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.n-card .n-img { width: 100%; height: 190px; object-fit: cover; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); transition: var(--tr); }
+.n-card .n-img { width: 100%; height: 190px; object-fit: cover; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); transition: var(--tr); display: block; }
+.n-card .n-img-wrap { overflow: hidden; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); min-height: 190px; }
 .n-card:hover .n-img { transform: scale(1.03); }
-.n-card .n-img-wrap { overflow: hidden; }
 .n-card .n-body { padding: 18px; }
 .n-card .n-src { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--red); margin-bottom: 8px; }
 .n-card .n-title { font-size: 0.92rem; font-weight: 700; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
@@ -247,7 +247,8 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
 .stad-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
 .stad-card { min-width: 190px; flex-shrink: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 14px; text-align: center; transition: var(--tr); }
 .stad-card:hover { border-color: var(--gold); transform: translateY(-3px); }
-.stad-card .s-icon { font-size: 1.8rem; margin-bottom: 6px; }
+.stad-card .s-icon { margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+.stad-card .s-icon img.fi { height: 24px; width: 34px; border-radius: 3px; }
 .stad-card .s-name { font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
 .stad-card .s-city { font-size: 0.68rem; color: var(--t3); }
 .stad-card .s-cap { font-size: 0.64rem; color: var(--gold); margin-top: 4px; }
@@ -586,16 +587,18 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     <div class="section-title"><div class="pulse-dot"></div> SEDES & ESTÁDIOS</div>
     <div class="gradient-line"></div>
     <div class="stad-scroll">
-      <div class="stad-card"><div class="s-icon">&#127942;</div><div class="s-name">MetLife Stadium</div><div class="s-city">Nova Jersey, EUA</div><div class="s-cap">82.500 &bull; FINAL</div></div>
-      <div class="stad-card"><div class="s-icon">&#127946;</div><div class="s-name">Estádio Azteca</div><div class="s-city">Cidade do México</div><div class="s-cap">87.523 &bull; ABERTURA</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">SoFi Stadium</div><div class="s-city">Los Angeles, EUA</div><div class="s-cap">70.240</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">Hard Rock Stadium</div><div class="s-city">Miami, EUA</div><div class="s-cap">64.767</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">AT&amp;T Stadium</div><div class="s-city">Dallas, EUA</div><div class="s-cap">80.000</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">Lincoln Financial</div><div class="s-city">Philadelphia, EUA</div><div class="s-cap">69.176</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">Mercedes-Benz</div><div class="s-city">Atlanta, EUA</div><div class="s-cap">71.000</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">Lumen Field</div><div class="s-city">Seattle, EUA</div><div class="s-cap">68.740</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">BMO Field</div><div class="s-city">Toronto, Canadá</div><div class="s-cap">45.736</div></div>
-      <div class="stad-card"><div class="s-icon">&#127967;</div><div class="s-name">BC Place</div><div class="s-city">Vancouver, Canadá</div><div class="s-cap">54.500</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">MetLife Stadium</div><div class="s-city">Nova Jersey, EUA</div><div class="s-cap" style="color:#FFDF00;">82.500 - FINAL</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/mx.png" class="fi" alt="MX"></div><div class="s-name">Est&aacute;dio Azteca</div><div class="s-city">Cidade do M&eacute;xico</div><div class="s-cap" style="color:var(--red);">87.523 - ABERTURA</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">SoFi Stadium</div><div class="s-city">Los Angeles, EUA</div><div class="s-cap">70.240</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">Hard Rock Stadium</div><div class="s-city">Miami, EUA</div><div class="s-cap">64.767</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">AT&amp;T Stadium</div><div class="s-city">Dallas, EUA</div><div class="s-cap">80.000</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">Lincoln Financial</div><div class="s-city">Philadelphia, EUA</div><div class="s-cap">69.176</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">Mercedes-Benz</div><div class="s-city">Atlanta, EUA</div><div class="s-cap">71.000</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/us.png" class="fi" alt="US"></div><div class="s-name">Lumen Field</div><div class="s-city">Seattle, EUA</div><div class="s-cap">68.740</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/ca.png" class="fi" alt="CA"></div><div class="s-name">BMO Field</div><div class="s-city">Toronto, Canad&aacute;</div><div class="s-cap">45.736</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/ca.png" class="fi" alt="CA"></div><div class="s-name">BC Place</div><div class="s-city">Vancouver, Canad&aacute;</div><div class="s-cap">54.500</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/mx.png" class="fi" alt="MX"></div><div class="s-name">Estadio Monterrey</div><div class="s-city">Monterrey, M&eacute;xico</div><div class="s-cap">53.500</div></div>
+      <div class="stad-card"><div class="s-icon"><img src="https://flagcdn.com/w40/mx.png" class="fi" alt="MX"></div><div class="s-name">Estadio Guadalajara</div><div class="s-city">Guadalajara, M&eacute;xico</div><div class="s-cap">46.232</div></div>
     </div>
   </div>
 </section>
@@ -685,12 +688,18 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     ticker.innerHTML = spans + spans;
   }
 
+  function imgErr(el) {
+    el.onerror = null;
+    el.style.display = 'none';
+    el.parentElement.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)';
+  }
+
   function updateFeatured(article) {
     var card = document.querySelector('.featured-card');
     if (!card || !article) return;
     card.setAttribute('href', article.url);
     var img = card.querySelector('.fc-img img');
-    if (img) img.src = article.image;
+    if (img) { img.src = article.image; img.onerror = function(){ imgErr(this); }; }
     var title = card.querySelector('.fc-title');
     if (title) title.textContent = article.title;
     var sub = card.querySelector('.fc-sub');
@@ -699,12 +708,14 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     if (meta) meta.textContent = article.source + ' \u2022 ' + timeAgo(article.publishedAt);
   }
 
+  var IMG_ERR = 'onerror="this.onerror=null;this.style.display=\'none\';this.parentElement.style.background=\'linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%)\';this.parentElement.style.minHeight=this.classList.contains(\'hl-img\')?\'110px\':\'190px\';"';
+
   function updateHeadlines(articles) {
     var strip = document.querySelector('.headline-strip');
     if (!strip || articles.length === 0) return;
     strip.innerHTML = articles.map(function(a, i) {
       return '<a class="hl-card" href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
-        '<img class="hl-img" src="' + esc(a.image) + '" alt="" loading="lazy" onerror="this.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\';">' +
+        '<div style="overflow:hidden;position:relative;"><img class="hl-img" src="' + esc(a.image) + '" alt="" loading="lazy" ' + IMG_ERR + '></div>' +
         '<div class="hl-body"><div class="hl-src">' +
         (i < 3 ? '<span class="new-tag">NOVO</span> ' : '') +
         esc(a.source) + '</div><div class="hl-title">' + esc(a.title) + '</div></div></a>';
@@ -716,8 +727,7 @@ img.fi { display: inline-block; height: 20px; width: auto; border-radius: 3px; v
     if (!grid || articles.length === 0) return;
     grid.innerHTML = articles.map(function(a) {
       return '<a class="n-card" href="' + esc(a.url) + '" target="_blank" rel="noopener">' +
-        '<div class="n-img-wrap"><img class="n-img" src="' + esc(a.image) + '" alt="" loading="lazy" ' +
-        'onerror="this.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\';this.style.objectFit=\'none\';"></div>' +
+        '<div class="n-img-wrap"><img class="n-img" src="' + esc(a.image) + '" alt="" loading="lazy" ' + IMG_ERR + '></div>' +
         '<div class="n-body"><div class="n-src">' + esc(a.source) + '</div>' +
         '<div class="n-title">' + esc(a.title) + '</div>' +
         '<div class="n-meta">' + timeAgo(a.publishedAt) + '</div></div></a>';
