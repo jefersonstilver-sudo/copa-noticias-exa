@@ -17,6 +17,7 @@ const VIDEOS_DIR = join(PROJECT_DIR, 'videos');
 const REPORTS_DIR = join(PROJECT_DIR, 'videos', 'reports');
 const TEMP_DIR = join(PROJECT_DIR, 'scripts', '.temp');
 const API_URL = 'https://central-copa-2026.vercel.app/api/news';
+const SCORES_URL = 'https://central-copa-2026.vercel.app/api/scores';
 
 const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -34,6 +35,68 @@ async function fetchNews() {
   const data = await res.json();
   console.log(`      ${data.count} artigos (Google: ${data.sources.google}, NewsData: ${data.sources.newsdata}, GNews: ${data.sources.gnews})`);
   return data;
+}
+
+// ============================================================
+//  Fetch live scores + standings
+// ============================================================
+async function fetchScores() {
+  console.log('[1b/6] Buscando placares e classificacao...');
+  try {
+    const res = await fetch(SCORES_URL + '?t=' + Date.now());
+    if (!res.ok) throw new Error('scores HTTP ' + res.status);
+    const d = await res.json();
+    console.log(`      placares: ${d.counts ? d.counts.total : 0} jogos (fonte: ${d.source})`);
+    return d;
+  } catch (e) {
+    console.warn('      [AVISO] placares indisponiveis:', e.message);
+    return null;
+  }
+}
+
+function flagUrl(code) { return `https://flagcdn.com/w80/${code || 'un'}.png`; }
+
+function vMatch(m) {
+  const show = m.status === 'finished' || m.status === 'live';
+  const live = m.status === 'live';
+  const sh = m.score && m.score.home != null ? m.score.home : 0;
+  const sa = m.score && m.score.away != null ? m.score.away : 0;
+  const cap = m.status === 'finished' ? `${esc(m.group || m.stage || '')} &bull; ENCERRADO`
+    : live ? `${esc(m.group || m.stage || '')} &bull; ${m.minute ? m.minute + "'" : 'AO VIVO'}`
+    : `${esc(m.group || m.stage || '')} &bull; ${m.dia}/${m.mes} ${m.hora}`;
+  const gh = show ? `<span class="g${live ? ' live' : ''}">${sh}</span>` : '';
+  const ga = show ? `<span class="g${live ? ' live' : ''}">${sa}</span>` : '';
+  return `<div class="sp-match">
+    <div class="sp-row"><img src="${flagUrl(m.home.code)}" onerror="this.style.visibility='hidden'"><span class="nm">${esc(m.home.name)}</span>${gh}</div>
+    <div class="sp-row"><img src="${flagUrl(m.away.code)}" onerror="this.style.visibility='hidden'"><span class="nm">${esc(m.away.name)}</span>${ga}</div>
+    <div class="sp-cap">${cap}</div>
+  </div>`;
+}
+
+function vStandings(grp) {
+  if (!grp || !grp.table) return '';
+  const rows = grp.table.slice(0, 4).map((r) => {
+    const br = r.code === 'br' ? ' style="color:#FFDF00;font-weight:900;"' : '';
+    return `<tr${br}><td>${r.pos}</td><td class="tnm"><img src="${flagUrl(r.code)}" onerror="this.style.visibility='hidden'">${esc(r.team)}</td><td>${r.pts}</td><td>${r.j}</td><td>${r.sg > 0 ? '+' : ''}${r.sg}</td></tr>`;
+  }).join('');
+  return `<div class="sp-title">CLASSIFICACAO ${esc(grp.group).toUpperCase()}</div>
+  <table class="sp-table"><tr><th>#</th><th class="tnm">TIME</th><th>PTS</th><th>J</th><th>SG</th></tr>${rows}</table>`;
+}
+
+function buildScoresPanel(scores) {
+  if (!scores) return '';
+  const live = scores.live || [];
+  const todayArr = scores.today || [];
+  let list = [...live, ...todayArr.filter((m) => m.status !== 'live')];
+  if (!list.length) list = (scores.recent && scores.recent.length) ? scores.recent : (scores.upcoming || []);
+  const grpC = (scores.standings || []).find((s) => s.group === 'Grupo C');
+  if (!list.length && !grpC) return '';
+  const title = live.length ? 'JOGOS AO VIVO' : (todayArr.length ? 'JOGOS DE HOJE' : 'PROXIMOS JOGOS');
+  return `<div class="scores-panel">
+    <div class="sp-head"><span class="sp-dot"></span> ${title}</div>
+    ${list.slice(0, 2).map(vMatch).join('')}
+    ${vStandings(grpC)}
+  </div>`;
 }
 
 // ============================================================
@@ -63,16 +126,20 @@ function getMeta() {
 // ============================================================
 //  Generate HTML (temp file for recording)
 // ============================================================
-function generateHTML(articles, meta) {
+function generateHTML(articles, meta, scores) {
   const headline = articles[0];
   const cards = articles.slice(1, 5);
   const ticker = articles.slice(0, 10);
 
-  const copaDate = new Date('2026-06-11T20:00:00Z');
-  const diff = Math.max(0, copaDate - new Date());
+  const nextBR = scores && scores.brazil ? scores.brazil.find((m) => m.status !== 'finished') : null;
+  const cdTarget = nextBR ? new Date(nextBR.iso) : new Date('2026-06-13T22:00:00Z');
+  const opp = nextBR ? (nextBR.home.code === 'br' ? nextBR.away.name : nextBR.home.name) : 'Marrocos';
+  const cdLabel = 'PROX: BRASIL x ' + String(opp).toUpperCase();
+  const diff = Math.max(0, cdTarget - new Date());
   const dias = Math.floor(diff / 86400000);
   const horas = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
   const mins = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+  const scoresPanel = buildScoresPanel(scores);
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -283,6 +350,34 @@ body {
   90% { opacity: 0.2; }
   100% { transform: translateY(-1100px) rotate(720deg); opacity: 0; }
 }
+
+/* === SCORES PANEL (right) === */
+.scores-panel {
+  position: absolute; top: 250px; right: 48px; width: 348px; z-index: 10;
+  animation: fadeSlideLeft 0.8s ease-out 0.7s both;
+}
+.sp-head {
+  font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 700;
+  letter-spacing: 3px; color: #fff; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sp-dot { width: 12px; height: 12px; border-radius: 50%; background: #ff3b3b; box-shadow: 0 0 16px #ff3b3b; animation: blink 1.2s infinite; }
+.sp-match {
+  background: rgba(0,0,0,0.74); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; backdrop-filter: blur(10px);
+}
+.sp-row { display: flex; align-items: center; gap: 10px; font-size: 23px; font-weight: 700; line-height: 1.5; }
+.sp-row img { width: 38px; height: 26px; border-radius: 3px; object-fit: cover; }
+.sp-row .nm { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp-row .g { font-family: 'Orbitron', sans-serif; font-size: 27px; font-weight: 900; min-width: 36px; text-align: right; }
+.sp-row .g.live { color: #ff3b3b; }
+.sp-cap { font-size: 13px; color: rgba(255,255,255,0.45); letter-spacing: 1.5px; margin-top: 8px; text-transform: uppercase; }
+.sp-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.6); margin: 6px 0 8px; }
+.sp-table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.6); border-radius: 12px; overflow: hidden; }
+.sp-table th { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 700; padding: 8px 5px; letter-spacing: 1px; }
+.sp-table td { font-size: 17px; font-weight: 700; padding: 9px 5px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+.sp-table td.tnm, .sp-table th.tnm { text-align: left; white-space: nowrap; }
+.sp-table td.tnm img { width: 26px; height: 18px; border-radius: 2px; vertical-align: middle; margin-right: 7px; }
 </style>
 </head>
 <body>
@@ -318,13 +413,15 @@ ${Array.from({length: 18}, (_, i) => {
 </div>
 
 <div class="countdown-corner">
-  <h3>COPA DO MUNDO 2026</h3>
+  <h3>${esc(cdLabel)}</h3>
   <div class="countdown-nums">
     <div class="cd-box"><div class="num">${dias}</div><div class="lbl">DIAS</div></div>
     <div class="cd-box"><div class="num">${horas}</div><div class="lbl">HORAS</div></div>
     <div class="cd-box"><div class="num">${mins}</div><div class="lbl">MIN</div></div>
   </div>
 </div>
+
+${scoresPanel}
 
 <div class="headline-area">
   <div class="headline-tag">DESTAQUE AGORA</div>
@@ -485,6 +582,7 @@ async function main() {
   console.log('');
 
   const data = await fetchNews();
+  const scores = await fetchScores();
   const meta = getMeta();
   const articles = data.articles.slice(0, 10);
 
@@ -495,7 +593,7 @@ async function main() {
 
   // Generate temp HTML
   console.log('[2/6] Gerando HTML temporario...');
-  const html = generateHTML(articles, meta);
+  const html = generateHTML(articles, meta, scores);
   writeFileSync(meta.tempHtml, html, 'utf-8');
 
   // Record video

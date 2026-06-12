@@ -3,10 +3,12 @@
 //  Vercel Serverless Function
 //  Sources: Google News RSS + NewsData.io + GNews.io
 //  Filters: removes betting, spam, irrelevant content
+//  Adds: scope classification (brasil | mundo) + buckets
+//  v3 — Brasil/Mundo split
 // ============================================================
 
-const NEWSDATA_KEY = process.env.NEWSDATA_KEY || 'pub_6380ed673a7d406eabdf98ed11f20c87';
-const GNEWS_KEY = process.env.GNEWS_KEY || '36812da28a16233d7d5bd92397a18b42';
+const NEWSDATA_KEY = process.env.NEWSDATA_KEY || '';
+const GNEWS_KEY = process.env.GNEWS_KEY || '';
 
 let cache = { data: null, ts: 0 };
 const CACHE_TTL = 10 * 60 * 1000; // 10 min
@@ -39,25 +41,47 @@ const BLOCKED_KEYWORDS = [
   'pixbet', 'sportingbet', 'betfair', 'casa de apostas',
   'cassino', 'casino', 'slot', 'bonus de',
   'virginia ', 'virginia fonseca', 'influenciador',
-  'horoscopo', 'hor\u00f3scopo', 'signo', 'astrologia',
+  'horoscopo', 'horóscopo', 'signo', 'astrologia',
   'coluna hd', 'fofoca', 'celebridade',
 ];
 
 const RELEVANCE_KEYWORDS = [
   'copa do mundo', 'copa 2026', 'world cup',
-  'sele\u00e7\u00e3o brasileira', 'selecao brasileira', 'brasil copa',
-  'convoca\u00e7\u00e3o', 'convocados', 'convocacao',
+  'seleção brasileira', 'selecao brasileira', 'brasil copa',
+  'convocação', 'convocados', 'convocacao',
   'ancelotti', 'neymar', 'vini', 'endrick', 'pedro', 'raphinha',
-  'richarlison', 'rodrygo', 'milit\u00e3o', 'est\u00eav\u00e3o',
+  'richarlison', 'rodrygo', 'militão', 'estêvão',
   'fase de grupos', 'grupo c', 'oitavas', 'quartas', 'semifinal', 'final',
-  'est\u00e1dio', 'estadio', 'metlife', 'azteca', 'hard rock',
-  'fifa', 'eliminat\u00f3rias', 'amistoso',
-  'marrocos', 'haiti', 'esc\u00f3cia',
-  'fran\u00e7a', 'argentina', 'alemanha', 'espanha', 'inglaterra', 'portugal',
-  'lesao', 'les\u00e3o', 'cortado', 'machucado',
+  'estádio', 'estadio', 'metlife', 'azteca', 'hard rock',
+  'fifa', 'eliminatórias', 'amistoso',
+  'marrocos', 'haiti', 'escócia',
+  'frança', 'argentina', 'alemanha', 'espanha', 'inglaterra', 'portugal',
+  'lesao', 'lesão', 'cortado', 'machucado',
   'tabela copa', 'jogos da copa', 'abertura copa',
   'torcida', 'ingresso', 'sede', 'sedes',
 ];
+
+// ============================================================
+//  BRAZIL vs WORLD classification
+// ============================================================
+function norm(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+const BRAZIL_TERMS = [
+  'brasil', 'brasileir', 'selecao brasileira', 'ancelotti', 'neymar',
+  'vini jr', 'vinicius', 'endrick', 'raphinha', 'richarlison', 'rodrygo',
+  'militao', 'estevao', 'alisson', 'casemiro', 'marquinhos', 'bruno guimaraes',
+  'cbf', 'canarinho', 'hexa', 'patria de chuteiras', 'wesley', 'bremer',
+];
+
+function classifyScope(article) {
+  const t = norm(article.title + ' ' + article.description);
+  for (const k of BRAZIL_TERMS) {
+    if (t.includes(k)) return 'brasil';
+  }
+  return 'mundo';
+}
 
 function isRelevant(article) {
   const text = (article.title + ' ' + article.description).toLowerCase();
@@ -81,8 +105,10 @@ function isRelevant(article) {
 async function fetchGoogleNews() {
   const queries = [
     'copa+do+mundo+2026',
-    'convoca%C3%A7%C3%A3o+sele%C3%A7%C3%A3o+brasileira+copa+2026',
+    'copa+2026+jogos+resultado+hoje',
     'copa+2026+brasil+neymar+ancelotti',
+    'world+cup+2026+resultado+gols',
+    'copa+2026+franca+argentina+espanha+inglaterra+portugal',
   ];
   const articles = [];
 
@@ -137,6 +163,7 @@ async function fetchGoogleNews() {
 //  Source 2: NewsData.io
 // ============================================================
 async function fetchNewsData() {
+  if (!NEWSDATA_KEY) return [];
   try {
     const url = `https://newsdata.io/api/1/latest?apikey=${NEWSDATA_KEY}&q=copa%20do%20mundo%202026&language=pt&size=10`;
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
@@ -163,6 +190,7 @@ async function fetchNewsData() {
 //  Source 3: GNews.io
 // ============================================================
 async function fetchGNews() {
+  if (!GNEWS_KEY) return [];
   try {
     const url = `https://gnews.io/api/v4/search?q=copa+do+mundo+2026&lang=pt&country=br&max=10&sortby=publishedAt&token=${GNEWS_KEY}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
@@ -245,7 +273,7 @@ function deduplicateArticles(articles) {
     const normalized = a.title
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[̀-ͯ]/g, '')
       .replace(/[^\w\s]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
@@ -306,7 +334,6 @@ module.exports = async (req, res) => {
   articles.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
 
   // Assign fallback images to articles without images
-  // Use a deterministic index based on title hash so same article always gets same image
   articles = articles.map((a) => {
     if (!a.image) {
       const hash = a.title.split('').reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
@@ -316,12 +343,20 @@ module.exports = async (req, res) => {
   });
 
   // Limit
-  articles = articles.slice(0, 50);
+  articles = articles.slice(0, 60);
+
+  // Tag scope (brasil | mundo) and split into buckets
+  articles = articles.map((a) => ({ ...a, scope: classifyScope(a) }));
+  const brasil = articles.filter((a) => a.scope === 'brasil');
+  const mundo = articles.filter((a) => a.scope === 'mundo');
 
   const result = {
     articles,
+    brasil,
+    mundo,
     updatedAt: new Date().toISOString(),
     count: articles.length,
+    scopeCounts: { brasil: brasil.length, mundo: mundo.length },
     sources: {
       google: googleArticles.length,
       newsdata: newsdataArticles.length,
