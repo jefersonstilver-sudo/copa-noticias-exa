@@ -301,11 +301,18 @@ function normalizeFDStandings(raw) {
 //  Source 2: ESPN API
 // ============================================================
 async function fetchESPN() {
+  // Cover entire tournament: June 11 - July 19, 2026
+  // ESPN accepts date ranges: YYYYMMDD-YYYYMMDD
   const dates = [];
-  const now = new Date();
-  for (let i = -3; i <= 5; i++) {
-    const d = new Date(now.getTime() + i * 86400000);
-    dates.push(d.toISOString().slice(0, 10).replace(/-/g, ''));
+  const tournStart = new Date('2026-06-11T00:00:00Z');
+  const tournEnd = new Date('2026-07-20T00:00:00Z');
+  // Batch into 5-day chunks to reduce number of requests
+  for (let d = new Date(tournStart); d <= tournEnd; ) {
+    const chunkEnd = new Date(Math.min(d.getTime() + 4 * 86400000, tournEnd.getTime()));
+    const from = d.toISOString().slice(0, 10).replace(/-/g, '');
+    const to = chunkEnd.toISOString().slice(0, 10).replace(/-/g, '');
+    dates.push(from === to ? from : `${from}-${to}`);
+    d = new Date(chunkEnd.getTime() + 86400000);
   }
 
   const allMatches = [];

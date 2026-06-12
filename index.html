@@ -794,11 +794,20 @@ img.fi{display:inline-block;height:22px;width:auto;border-radius:3px;vertical-al
     return '<div class="match'+br+lv+'" onclick="openModal(this)" data-match=\''+esc(JSON.stringify(m))+'\' role="button" tabindex="0">'+teamHtml(m.home,'home')+'<div class="mid">'+mid+'</div>'+teamHtml(m.away,'away')+
       '<div class="meta-line">'+esc(grp)+'</div>'+evStr+vLine+'</div>';
   }
+  function highlightUrl(m){
+    return 'https://www.youtube.com/results?search_query='+encodeURIComponent(m.home.name+' x '+m.away.name+' copa 2026 melhores momentos');
+  }
   function resCard(m){
     var hw=m.score.home>m.score.away,aw=m.score.away>m.score.home;
     function row(t,g,win,lose){return '<div class="rc-team '+(win?'win':'')+' '+(lose?'lose':'')+'"><img src="'+flag(t.code)+'" class="fi" onerror="this.style.visibility=\'hidden\'"><span class="nm">'+esc(t.name)+'</span><span class="gl">'+g+'</span></div>';}
+    var vName=venueStr(m.venue);
+    var infoLine='<div style="padding:6px 12px 10px;font-size:0.6rem;color:var(--t3);display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+
+      '<span>'+m.hora+' BRT</span>'+
+      (vName?'<span>\u2022 '+esc(vName)+'</span>':'')+
+      '</div>';
+    var hlLink='<a href="'+highlightUrl(m)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 12px;font-size:0.6rem;font-weight:700;color:var(--red);border-top:1px solid rgba(255,255,255,0.04);text-transform:uppercase;letter-spacing:0.5px;transition:var(--tr)">&#9654; Melhores Momentos</a>';
     return '<div class="res-card" onclick="openModal(this)" data-match=\''+esc(JSON.stringify(m))+'\' role="button" tabindex="0"><div class="rc-top"><span>'+esc(m.group||m.stage||'')+'</span><span>'+m.dia+'/'+m.mes+'</span></div>'+
-      row(m.home,m.score.home,hw,aw)+row(m.away,m.score.away,aw,hw)+'</div>';
+      row(m.home,m.score.home,hw,aw)+row(m.away,m.score.away,aw,hw)+infoLine+hlLink+'</div>';
   }
 
   function renderToday(sc){
@@ -918,12 +927,22 @@ img.fi{display:inline-block;height:22px;width:auto;border-radius:3px;vertical-al
         if(m.status==='finished') statusHtml='<span style="color:var(--t3);font-size:0.65rem;font-weight:800">'+m.score.home+'-'+m.score.away+'</span>';
         else if(m.status==='live') statusHtml='<span style="color:var(--red);font-size:0.65rem;font-weight:800">'+(m.score.home||0)+'-'+(m.score.away||0)+' '+(m.minute||'')+'</span>';
         else statusHtml='<span class="ux">VS</span>';
+        var vName=venueStr(m.venue);
+        var extraInfo='';
+        if(m.status==='finished'){
+          extraInfo='<div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:2px 0 0;font-size:0.55rem;color:var(--t3)">'+
+            (vName?'<span>&#127967; '+esc(vName)+'</span>':'')+
+            '<a href="'+highlightUrl(m)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--red);font-weight:700;margin-left:auto">&#9654; Melhores Momentos</a>'+
+          '</div>';
+        } else if(vName){
+          extraInfo='<div style="grid-column:1/-1;font-size:0.55rem;color:var(--t3);padding:2px 0 0">&#127967; '+esc(vName)+'</div>';
+        }
         return '<div class="up-row'+isbr+'" onclick="openModal(this)" data-match=\''+esc(JSON.stringify(m))+'\' role="button" tabindex="0">'+
           '<div class="ud">'+m.hora+' BRT</div>'+
           '<div class="ut r"><span>'+esc(m.home.name)+'</span><img src="'+flag(m.home.code)+'" class="fi" onerror="this.style.visibility=\'hidden\'"></div>'+
           '<div style="text-align:center">'+statusHtml+'</div>'+
           '<div class="ut"><img src="'+flag(m.away.code)+'" class="fi" onerror="this.style.visibility=\'hidden\'"><span>'+esc(m.away.name)+'</span></div>'+
-          '<div class="uv">'+esc(m.group||m.stage||'')+'</div></div>';
+          '<div class="uv">'+esc(m.group||m.stage||'')+'</div>'+extraInfo+'</div>';
       }).join('');
       return '<div class="day-block"><div class="day-header">'+(br?'&#127463;&#127479; ':'')+esc(o.semana)+', '+o.k+'</div>'+rows+'</div>';
     }).join('');
@@ -982,6 +1001,7 @@ img.fi{display:inline-block;height:22px;width:auto;border-radius:3px;vertical-al
           '<div class="mm-detail"><span class="icon">&#9917;</span><div>'+esc(m.group||'')+' — '+esc(m.stage||'')+'</div></div>'+
         '</div>'+
         eventsHtml+
+        (m.status==='finished'?'<div style="text-align:center;margin-top:12px"><a href="'+highlightUrl(m)+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--t1);font-size:0.75rem;font-weight:700;padding:10px 20px;border-radius:20px;min-height:44px;transition:var(--tr)">&#9654; Melhores Momentos no YouTube</a></div>':'')+
         '<div style="text-align:center;margin-top:8px">'+cazeBtn('mm-caze')+'</div>';
 
       mm.classList.add('open');
