@@ -1,0 +1,5 @@
+.vercel
+node_modules/
+scripts/.temp/
+videos/*.mp4
+videos/reports/*.txt
