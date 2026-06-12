@@ -1,32 +1,36 @@
 // ============================================================
-//  Central Copa 2026 — Live Scores & Standings API v3
+//  Central Copa 2026 — Live Scores & Standings API v4
 //  Vercel Serverless Function
-//  Sources: football-data.org (key) → openfootball (free) → hardcoded fallback
-//  Includes: broadcast info (onde assistir) + BRT times
+//  Sources (priority order):
+//    1. football-data.org (env FOOTBALL_DATA_KEY) — best quality
+//    2. ESPN API (free, no key) — live scores + results
+//    3. openfootball (free) — fixtures fallback
+//  Includes: broadcast info + BRT times + venues
 // ============================================================
 
 const FD_KEY = process.env.FOOTBALL_DATA_KEY || '';
 const FD_BASE = 'https://api.football-data.org/v4/competitions/WC';
+const ESPN_SCOREBOARD = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard';
 const OPENFOOTBALL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 
 let cache = { data: null, ts: 0 };
-const CACHE_TTL = 60 * 1000;
+const CACHE_TTL = 45 * 1000; // 45s for fresher live data
 
 // ============================================================
-//  Broadcast info — onde assistir cada jogo
+//  Broadcast info
 // ============================================================
 const BROADCASTS = {
   default: [
+    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTVOficial/streams' },
     { name: 'Globo', icon: '📺', url: 'https://globoplay.globo.com/' },
     { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
-    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazsTV' },
     { name: 'FIFA+', icon: '⚽', url: 'https://www.fifa.com/fifaplus' },
   ],
   brazil: [
-    { name: 'Globo (TV aberta)', icon: '📺', url: 'https://globoplay.globo.com/' },
+    { name: 'Globo (aberta)', icon: '📺', url: 'https://globoplay.globo.com/' },
     { name: 'Globoplay', icon: '▶️', url: 'https://globoplay.globo.com/' },
-    { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
     { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTVOficial/streams' },
+    { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
     { name: 'FIFA+', icon: '⚽', url: 'https://www.fifa.com/fifaplus' },
   ],
 };
@@ -41,8 +45,10 @@ function getBroadcast(match) {
 // ============================================================
 const TEAMS = {
   'brazil': { pt: 'Brasil', code: 'br' },
+  'brasil': { pt: 'Brasil', code: 'br' },
   'argentina': { pt: 'Argentina', code: 'ar' },
   'mexico': { pt: 'México', code: 'mx' },
+  'méxico': { pt: 'México', code: 'mx' },
   'south africa': { pt: 'África do Sul', code: 'za' },
   'south korea': { pt: 'Coreia do Sul', code: 'kr' },
   'korea republic': { pt: 'Coreia do Sul', code: 'kr' },
@@ -104,63 +110,40 @@ const TEAMS = {
   'panama': { pt: 'Panamá', code: 'pa' },
 };
 
-const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
-// Venues for each match (group stage, by team codes)
-const VENUES = {
-  'mx-za': 'Estádio Azteca, Cidade do México',
-  'kr-cz': 'Rose Bowl, Los Angeles',
-  'ca-ba': 'BMO Field, Toronto',
-  'qa-ch': 'BC Place, Vancouver',
-  'br-ma': 'MetLife Stadium, Nova Jersey',
-  'ht-gb-sct': 'Lincoln Financial Field, Philadelphia',
-  'us-py': 'AT&T Stadium, Dallas',
-  'au-tr': 'SoFi Stadium, Los Angeles',
-  'de-ci': 'Lincoln Financial Field, Philadelphia',
-  'ec-cw': 'Mercedes-Benz Stadium, Atlanta',
-  'nl-se': 'Lumen Field, Seattle',
-  'tn-jp': 'BC Place, Vancouver',
-  'be-eg': 'Hard Rock Stadium, Miami',
-  'ir-nz': 'MetLife Stadium, Nova Jersey',
-  'es-sa': 'Lumen Field, Seattle',
-  'uy-cv': 'Mercedes-Benz Stadium, Atlanta',
-  'fr-sn': 'Lincoln Financial Field, Philadelphia',
-  'iq-no': 'BMO Field, Toronto',
-  'ar-dz': 'Hard Rock Stadium, Miami',
-  'at-jo': 'SoFi Stadium, Los Angeles',
-  'pt-cd': 'MetLife Stadium, Nova Jersey',
-  'uz-co': 'AT&T Stadium, Dallas',
-  'gb-eng-hr': 'NRG Stadium, Houston',
-  'gh-pa': 'Rose Bowl, Los Angeles',
-  'br-ht': 'Lincoln Financial Field, Philadelphia',
-  'gb-sct-br': 'Hard Rock Stadium, Miami',
+// Also map by ESPN abbreviated names / country codes
+const CODE_MAP = {
+  'BRA': 'br', 'ARG': 'ar', 'MEX': 'mx', 'RSA': 'za', 'KOR': 'kr',
+  'CZE': 'cz', 'CAN': 'ca', 'BIH': 'ba', 'QAT': 'qa', 'SUI': 'ch',
+  'MAR': 'ma', 'HAI': 'ht', 'SCO': 'gb-sct', 'USA': 'us', 'PAR': 'py',
+  'AUS': 'au', 'TUR': 'tr', 'GER': 'de', 'CIV': 'ci', 'ECU': 'ec',
+  'CUW': 'cw', 'NED': 'nl', 'SWE': 'se', 'TUN': 'tn', 'JPN': 'jp',
+  'BEL': 'be', 'EGY': 'eg', 'IRN': 'ir', 'NZL': 'nz', 'ESP': 'es',
+  'KSA': 'sa', 'URU': 'uy', 'CPV': 'cv', 'FRA': 'fr', 'SEN': 'sn',
+  'IRQ': 'iq', 'NOR': 'no', 'ALG': 'dz', 'AUT': 'at', 'JOR': 'jo',
+  'POR': 'pt', 'COD': 'cd', 'UZB': 'uz', 'COL': 'co', 'ENG': 'gb-eng',
+  'CRO': 'hr', 'GHA': 'gh', 'PAN': 'pa',
 };
 
-function getVenue(homeCode, awayCode) {
-  const key1 = homeCode + '-' + awayCode;
-  const key2 = awayCode + '-' + homeCode;
-  return VENUES[key1] || VENUES[key2] || 'Copa do Mundo 2026';
-}
+const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 function resolveTeam(name) {
   if (!name) return { pt: 'A definir', code: 'un', tbd: true };
   const key = String(name).trim().toLowerCase();
   if (TEAMS[key]) return { ...TEAMS[key], tbd: false };
-  return { pt: prettyPlaceholder(name), code: 'un', tbd: true };
+  return { pt: String(name).trim(), code: 'un', tbd: true };
 }
 
-function prettyPlaceholder(name) {
-  const n = String(name).trim();
-  const map = {
-    'UEFA Path A winner': 'Repescagem UEFA A',
-    'UEFA Path B winner': 'Repescagem UEFA B',
-    'UEFA Path C winner': 'Repescagem UEFA C',
-    'UEFA Path D winner': 'Repescagem UEFA D',
-    'IC Path 1 winner': 'Repescagem Mundial 1',
-    'IC Path 2 winner': 'Repescagem Mundial 2',
-  };
-  return map[n] || n;
+function resolveByCode(abbr) {
+  const code = CODE_MAP[abbr];
+  if (code) {
+    // Find the pt name
+    for (const v of Object.values(TEAMS)) {
+      if (v.code === code) return { pt: v.pt, code, tbd: false };
+    }
+    return { pt: abbr, code, tbd: false };
+  }
+  return null;
 }
 
 function flag(code) {
@@ -201,7 +184,7 @@ function stagePt(stage, round) {
 }
 
 // ============================================================
-//  Source 1: football-data.org
+//  Source 1: football-data.org (best, needs key)
 // ============================================================
 async function fetchFootballData() {
   if (!FD_KEY) return null;
@@ -232,7 +215,7 @@ async function fetchFootballData() {
       minute: m.minute || null,
       stage: stagePt(m.stage),
       group: groupPt(m.group || m.stage),
-      venue: getVenue(home.code, away.code),
+      venue: (m.venue || ''),
       home: { name: home.pt, code: home.code, flag: flag(home.code), tbd: home.tbd },
       away: { name: away.pt, code: away.code, flag: flag(away.code), tbd: away.tbd },
       score: {
@@ -257,8 +240,7 @@ function normalizeFDStandings(raw) {
     const table = (s.table || []).map((r) => {
       const t = resolveTeam(r.team && r.team.name);
       return {
-        pos: r.position,
-        team: t.pt, code: t.code, flag: flag(t.code),
+        pos: r.position, team: t.pt, code: t.code, flag: flag(t.code),
         j: r.playedGames, v: r.won, e: r.draw, d: r.lost,
         gp: r.goalsFor, gc: r.goalsAgainst, sg: r.goalDifference, pts: r.points,
       };
@@ -270,7 +252,145 @@ function normalizeFDStandings(raw) {
 }
 
 // ============================================================
-//  Source 2 (fallback): openfootball/worldcup.json
+//  Source 2: ESPN API (free, no key, live scores!)
+// ============================================================
+async function fetchESPN() {
+  // ESPN scoreboard returns today's matches with live scores
+  // We fetch multiple date ranges to get recent + upcoming
+  const dates = [];
+  const now = new Date();
+  // Get last 3 days + today + next 5 days
+  for (let i = -3; i <= 5; i++) {
+    const d = new Date(now.getTime() + i * 86400000);
+    dates.push(d.toISOString().slice(0, 10).replace(/-/g, ''));
+  }
+
+  const allMatches = [];
+  const fetches = dates.map(async (dateStr) => {
+    try {
+      const url = `${ESPN_SCOREBOARD}?dates=${dateStr}`;
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; CentralCopa2026/2.0)' },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return parseESPNEvents(data);
+    } catch (e) {
+      console.error(`[ESPN] error for ${dateStr}:`, e.message);
+      return [];
+    }
+  });
+
+  const results = await Promise.allSettled(fetches);
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) {
+      allMatches.push(...r.value);
+    }
+  }
+
+  // Deduplicate by match ID
+  const seen = new Set();
+  const unique = allMatches.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+
+  const standings = computeStandings(unique);
+  return { source: 'espn-live', matches: unique, standings };
+}
+
+function parseESPNEvents(data) {
+  if (!data || !data.events) return [];
+  return data.events.map((ev) => {
+    const comp = ev.competitions && ev.competitions[0];
+    if (!comp) return null;
+
+    const date = new Date(ev.date || comp.date);
+    const p = brParts(date);
+
+    // Status
+    const st = comp.status || {};
+    const stType = (st.type && st.type.name) || '';
+    let status = 'scheduled';
+    let minute = null;
+    if (stType === 'STATUS_IN_PROGRESS' || stType === 'STATUS_HALFTIME' || stType === 'STATUS_FIRST_HALF' || stType === 'STATUS_SECOND_HALF') {
+      status = 'live';
+      minute = st.displayClock || (st.type && st.type.shortDetail) || null;
+    } else if (stType === 'STATUS_FULL_TIME' || stType === 'STATUS_FINAL' || stType === 'STATUS_END_PERIOD') {
+      status = 'finished';
+    }
+
+    // Teams
+    const competitors = comp.competitors || [];
+    let homeData = competitors.find(c => c.homeAway === 'home') || competitors[0];
+    let awayData = competitors.find(c => c.homeAway === 'away') || competitors[1];
+    if (!homeData || !awayData) return null;
+
+    function parseTeam(c) {
+      const teamObj = c.team || {};
+      const name = teamObj.displayName || teamObj.name || teamObj.shortDisplayName || '';
+      const abbr = teamObj.abbreviation || '';
+
+      // Try to resolve by abbreviation first, then by name
+      let resolved = resolveByCode(abbr);
+      if (!resolved) resolved = resolveTeam(name);
+
+      return {
+        name: resolved.pt,
+        code: resolved.code,
+        flag: flag(resolved.code),
+        tbd: resolved.tbd,
+        score: parseInt(c.score, 10),
+      };
+    }
+
+    const home = parseTeam(homeData);
+    const away = parseTeam(awayData);
+
+    // Venue
+    const venue = comp.venue ? (comp.venue.fullName || comp.venue.shortName || '') : '';
+
+    // Group/stage
+    const notes = (comp.notes || []).map(n => n.headline || '').join(' ');
+    const group = groupPt(notes) || groupPt(ev.season && ev.season.type && ev.season.type.name) || null;
+    const stage = notes ? stagePt(notes) : 'Fase de Grupos';
+
+    // Events/incidents (goals, cards)
+    let events = [];
+    if (comp.details) {
+      events = comp.details.map(d => ({
+        type: d.type && d.type.text || '',
+        clock: d.clock && d.clock.displayValue || '',
+        team: d.team && d.team.abbreviation || '',
+        athlete: d.athletesInvolved && d.athletesInvolved[0] && d.athletesInvolved[0].displayName || '',
+      }));
+    }
+
+    const match = {
+      id: 'espn-' + ev.id,
+      iso: p.iso, ymd: p.ymd, dia: p.dia, mes: p.mes, semana: p.semana, hora: p.hora,
+      status,
+      minute,
+      stage,
+      group,
+      venue,
+      home: { name: home.name, code: home.code, flag: home.flag, tbd: home.tbd },
+      away: { name: away.name, code: away.code, flag: away.flag, tbd: away.tbd },
+      score: {
+        home: (status === 'finished' || status === 'live') ? home.score : null,
+        away: (status === 'finished' || status === 'live') ? away.score : null,
+      },
+      events: events.length ? events : undefined,
+    };
+    match.broadcast = getBroadcast(match);
+    return match;
+  }).filter(Boolean);
+}
+
+// ============================================================
+//  Source 3 (fallback): openfootball/worldcup.json
 // ============================================================
 function parseOpenfootballDate(dateStr, timeStr) {
   const m = (timeStr || '').match(/(\d{1,2}):(\d{2})\s*UTC([+-]\d{1,2})/);
@@ -300,7 +420,7 @@ async function fetchOpenfootball() {
       minute: null,
       stage: stagePt(null, m.round),
       group: groupPt(m.group),
-      venue: getVenue(home.code, away.code),
+      venue: '',
       home: { name: home.pt, code: home.code, flag: flag(home.code), tbd: home.tbd },
       away: { name: away.pt, code: away.code, flag: flag(away.code), tbd: away.tbd },
       score: { home: hasScore ? m.score.ft[0] : null, away: hasScore ? m.score.ft[1] : null },
@@ -313,6 +433,9 @@ async function fetchOpenfootball() {
   return { source: 'openfootball', matches, standings };
 }
 
+// ============================================================
+//  Compute standings from match results
+// ============================================================
 function computeStandings(matches) {
   const groups = {};
   for (const m of matches) {
@@ -345,6 +468,37 @@ function computeStandings(matches) {
 }
 
 // ============================================================
+//  Merge ESPN live data with openfootball fixtures
+//  ESPN has today's scores; openfootball has full schedule
+// ============================================================
+function mergeData(espn, openfootball) {
+  // Use ESPN as primary (has live scores), fill gaps with openfootball
+  const espnById = new Map();
+  const espnByTeams = new Map();
+
+  for (const m of espn.matches) {
+    espnById.set(m.id, m);
+    // Index by home+away codes for dedup
+    const key = m.home.code + '-' + m.away.code + '-' + m.ymd;
+    espnByTeams.set(key, m);
+  }
+
+  // Add openfootball matches that ESPN doesn't have (future games beyond ESPN range)
+  for (const m of openfootball.matches) {
+    const key = m.home.code + '-' + m.away.code + '-' + m.ymd;
+    const keyRev = m.away.code + '-' + m.home.code + '-' + m.ymd;
+    if (!espnByTeams.has(key) && !espnByTeams.has(keyRev)) {
+      espn.matches.push(m);
+    }
+  }
+
+  // Recompute standings with all data
+  espn.standings = computeStandings(espn.matches);
+  espn.source = 'espn-live';
+  return espn;
+}
+
+// ============================================================
 //  Build response
 // ============================================================
 function buildResponse(base) {
@@ -357,13 +511,12 @@ function buildResponse(base) {
   const recent = matches
     .filter((m) => m.status === 'finished')
     .sort((a, b) => new Date(b.iso) - new Date(a.iso))
-    .slice(0, 12);
+    .slice(0, 16);
   const upcoming = matches
     .filter((m) => m.status === 'scheduled' && new Date(m.iso).getTime() >= nowMs - 3 * 3600 * 1000)
-    .slice(0, 20);
+    .slice(0, 24);
   const brazil = matches.filter((m) => m.home.code === 'br' || m.away.code === 'br');
 
-  // BRT clock
   const brtNow = new Date(nowMs - 3 * 3600 * 1000);
   const brtClock = String(brtNow.getUTCHours()).padStart(2, '0') + ':' + String(brtNow.getUTCMinutes()).padStart(2, '0');
 
@@ -388,24 +541,50 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
 
   if (cache.data && Date.now() - cache.ts < CACHE_TTL) {
-    // Update BRT clock even on cached response
     const brtNow = new Date(Date.now() - 3 * 3600 * 1000);
     const brtClock = String(brtNow.getUTCHours()).padStart(2, '0') + ':' + String(brtNow.getUTCMinutes()).padStart(2, '0');
     return res.status(200).json({ ...cache.data, brtClock, cached: true });
   }
 
   let base = null;
+
+  // Try football-data.org first (best quality)
   try {
     base = await fetchFootballData();
   } catch (e) {
     console.error('[scores] football-data failed:', e.message);
   }
+
+  // Try ESPN (free, has live scores)
+  if (!base) {
+    try {
+      const espnData = await fetchESPN();
+      if (espnData && espnData.matches.length > 0) {
+        // Also fetch openfootball for full schedule and merge
+        try {
+          const ofData = await fetchOpenfootball();
+          base = mergeData(espnData, ofData);
+        } catch (e) {
+          // ESPN alone is fine
+          base = espnData;
+        }
+      }
+    } catch (e) {
+      console.error('[scores] ESPN failed:', e.message);
+    }
+  }
+
+  // Fallback to openfootball alone
   if (!base) {
     try {
       base = await fetchOpenfootball();
     } catch (e) {
       console.error('[scores] openfootball failed:', e.message);
-      return res.status(200).json({ source: 'none', error: true, brtClock: '--:--', live: [], today: [], recent: [], upcoming: [], brazil: [], standings: [], matches: [], updatedAt: new Date().toISOString() });
+      return res.status(200).json({
+        source: 'none', error: true, brtClock: '--:--',
+        live: [], today: [], recent: [], upcoming: [], brazil: [],
+        standings: [], matches: [], updatedAt: new Date().toISOString(),
+      });
     }
   }
 
