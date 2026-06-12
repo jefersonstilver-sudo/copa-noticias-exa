@@ -21,7 +21,7 @@ const CACHE_TTL = 45 * 1000; // 45s for fresher live data
 // ============================================================
 const BROADCASTS = {
   default: [
-    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTVOficial/streams' },
+    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTV/streams' },
     { name: 'Globo', icon: '📺', url: 'https://globoplay.globo.com/' },
     { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
     { name: 'FIFA+', icon: '⚽', url: 'https://www.fifa.com/fifaplus' },
@@ -29,7 +29,7 @@ const BROADCASTS = {
   brazil: [
     { name: 'Globo (aberta)', icon: '📺', url: 'https://globoplay.globo.com/' },
     { name: 'Globoplay', icon: '▶️', url: 'https://globoplay.globo.com/' },
-    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTVOficial/streams' },
+    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTV/streams' },
     { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
     { name: 'FIFA+', icon: '⚽', url: 'https://www.fifa.com/fifaplus' },
   ],
