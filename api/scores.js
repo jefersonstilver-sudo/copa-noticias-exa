@@ -1,9 +1,8 @@
 // ============================================================
-//  Central Copa 2026 — Live Scores & Standings API
+//  Central Copa 2026 — Live Scores & Standings API v3
 //  Vercel Serverless Function
-//  Primary : football-data.org (env FOOTBALL_DATA_KEY) — near-live scores + standings
-//  Fallback : openfootball/worldcup.json — full fixtures, no key required
-//  Output  : normalized JSON (live / today / recent / upcoming / standings)
+//  Sources: football-data.org (key) → openfootball (free) → hardcoded fallback
+//  Includes: broadcast info (onde assistir) + BRT times
 // ============================================================
 
 const FD_KEY = process.env.FOOTBALL_DATA_KEY || '';
@@ -11,11 +10,34 @@ const FD_BASE = 'https://api.football-data.org/v4/competitions/WC';
 const OPENFOOTBALL = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 
 let cache = { data: null, ts: 0 };
-const CACHE_TTL = 60 * 1000; // 60s
+const CACHE_TTL = 60 * 1000;
 
 // ============================================================
-//  Team dictionary: EN (and aliases) -> { pt, code }
-//  code = flagcdn ISO code (gb-eng / gb-sct for home nations)
+//  Broadcast info — onde assistir cada jogo
+// ============================================================
+const BROADCASTS = {
+  default: [
+    { name: 'Globo', icon: '📺', url: 'https://globoplay.globo.com/' },
+    { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
+    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazsTV' },
+    { name: 'FIFA+', icon: '⚽', url: 'https://www.fifa.com/fifaplus' },
+  ],
+  brazil: [
+    { name: 'Globo (TV aberta)', icon: '📺', url: 'https://globoplay.globo.com/' },
+    { name: 'Globoplay', icon: '▶️', url: 'https://globoplay.globo.com/' },
+    { name: 'SporTV', icon: '📡', url: 'https://globoplay.globo.com/' },
+    { name: 'CazéTV', icon: '🎮', url: 'https://www.youtube.com/@CazeTVOficial/streams' },
+    { name: 'FIFA+', icon: '⚽', url: 'https://www.fifa.com/fifaplus' },
+  ],
+};
+
+function getBroadcast(match) {
+  const isBrazil = match.home.code === 'br' || match.away.code === 'br';
+  return isBrazil ? BROADCASTS.brazil : BROADCASTS.default;
+}
+
+// ============================================================
+//  Teams dictionary
 // ============================================================
 const TEAMS = {
   'brazil': { pt: 'Brasil', code: 'br' },
@@ -29,6 +51,7 @@ const TEAMS = {
   'canada': { pt: 'Canadá', code: 'ca' },
   'bosnia and herzegovina': { pt: 'Bósnia', code: 'ba' },
   'bosnia-herzegovina': { pt: 'Bósnia', code: 'ba' },
+  'bosnia & herzegovina': { pt: 'Bósnia', code: 'ba' },
   'qatar': { pt: 'Catar', code: 'qa' },
   'switzerland': { pt: 'Suíça', code: 'ch' },
   'morocco': { pt: 'Marrocos', code: 'ma' },
@@ -81,15 +104,49 @@ const TEAMS = {
   'panama': { pt: 'Panamá', code: 'pa' },
 };
 
-// Months PT
 const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+// Venues for each match (group stage, by team codes)
+const VENUES = {
+  'mx-za': 'Estádio Azteca, Cidade do México',
+  'kr-cz': 'Rose Bowl, Los Angeles',
+  'ca-ba': 'BMO Field, Toronto',
+  'qa-ch': 'BC Place, Vancouver',
+  'br-ma': 'MetLife Stadium, Nova Jersey',
+  'ht-gb-sct': 'Lincoln Financial Field, Philadelphia',
+  'us-py': 'AT&T Stadium, Dallas',
+  'au-tr': 'SoFi Stadium, Los Angeles',
+  'de-ci': 'Lincoln Financial Field, Philadelphia',
+  'ec-cw': 'Mercedes-Benz Stadium, Atlanta',
+  'nl-se': 'Lumen Field, Seattle',
+  'tn-jp': 'BC Place, Vancouver',
+  'be-eg': 'Hard Rock Stadium, Miami',
+  'ir-nz': 'MetLife Stadium, Nova Jersey',
+  'es-sa': 'Lumen Field, Seattle',
+  'uy-cv': 'Mercedes-Benz Stadium, Atlanta',
+  'fr-sn': 'Lincoln Financial Field, Philadelphia',
+  'iq-no': 'BMO Field, Toronto',
+  'ar-dz': 'Hard Rock Stadium, Miami',
+  'at-jo': 'SoFi Stadium, Los Angeles',
+  'pt-cd': 'MetLife Stadium, Nova Jersey',
+  'uz-co': 'AT&T Stadium, Dallas',
+  'gb-eng-hr': 'NRG Stadium, Houston',
+  'gh-pa': 'Rose Bowl, Los Angeles',
+  'br-ht': 'Lincoln Financial Field, Philadelphia',
+  'gb-sct-br': 'Hard Rock Stadium, Miami',
+};
+
+function getVenue(homeCode, awayCode) {
+  const key1 = homeCode + '-' + awayCode;
+  const key2 = awayCode + '-' + homeCode;
+  return VENUES[key1] || VENUES[key2] || 'Copa do Mundo 2026';
+}
 
 function resolveTeam(name) {
   if (!name) return { pt: 'A definir', code: 'un', tbd: true };
   const key = String(name).trim().toLowerCase();
   if (TEAMS[key]) return { ...TEAMS[key], tbd: false };
-  // Placeholder slots (e.g. "UEFA Path A winner", "2A", "W74")
   return { pt: prettyPlaceholder(name), code: 'un', tbd: true };
 }
 
@@ -103,8 +160,7 @@ function prettyPlaceholder(name) {
     'IC Path 1 winner': 'Repescagem Mundial 1',
     'IC Path 2 winner': 'Repescagem Mundial 2',
   };
-  if (map[n]) return map[n];
-  return n; // group/knockout codes like "1A", "W74", "3C/D/F/G/H"
+  return map[n] || n;
 }
 
 function flag(code) {
@@ -112,10 +168,9 @@ function flag(code) {
 }
 
 // ============================================================
-//  Date helpers — render in America/Sao_Paulo (BRT, UTC-3)
+//  Date helpers — BRT (UTC-3)
 // ============================================================
 function brParts(date) {
-  // date: JS Date (UTC). Shift to BRT (-3h, no DST in BR since 2019).
   const brt = new Date(date.getTime() - 3 * 3600 * 1000);
   return {
     iso: date.toISOString(),
@@ -170,13 +225,14 @@ async function fetchFootballData() {
     else if (st === 'FINISHED') status = 'finished';
     const home = resolveTeam(m.homeTeam && m.homeTeam.name);
     const away = resolveTeam(m.awayTeam && m.awayTeam.name);
-    return {
+    const match = {
       id: m.id,
       iso: p.iso, ymd: p.ymd, dia: p.dia, mes: p.mes, semana: p.semana, hora: p.hora,
       status,
       minute: m.minute || null,
       stage: stagePt(m.stage),
       group: groupPt(m.group || m.stage),
+      venue: getVenue(home.code, away.code),
       home: { name: home.pt, code: home.code, flag: flag(home.code), tbd: home.tbd },
       away: { name: away.pt, code: away.code, flag: flag(away.code), tbd: away.tbd },
       score: {
@@ -184,6 +240,8 @@ async function fetchFootballData() {
         away: m.score && m.score.fullTime ? m.score.fullTime.away : null,
       },
     };
+    match.broadcast = getBroadcast(match);
+    return match;
   });
 
   const standings = normalizeFDStandings(sData.standings || []);
@@ -215,7 +273,6 @@ function normalizeFDStandings(raw) {
 //  Source 2 (fallback): openfootball/worldcup.json
 // ============================================================
 function parseOpenfootballDate(dateStr, timeStr) {
-  // dateStr "2026-06-13", timeStr "18:00 UTC-4"
   const m = (timeStr || '').match(/(\d{1,2}):(\d{2})\s*UTC([+-]\d{1,2})/);
   if (!m) return new Date(dateStr + 'T12:00:00Z');
   const [, hh, mm, off] = m;
@@ -236,24 +293,26 @@ async function fetchOpenfootball() {
     const home = resolveTeam(m.team1);
     const away = resolveTeam(m.team2);
     const hasScore = m.score && m.score.ft;
-    return {
+    const match = {
       id: 'of-' + (m.num || i),
       iso: p.iso, ymd: p.ymd, dia: p.dia, mes: p.mes, semana: p.semana, hora: p.hora,
       status: hasScore ? 'finished' : 'scheduled',
       minute: null,
       stage: stagePt(null, m.round),
       group: groupPt(m.group),
+      venue: getVenue(home.code, away.code),
       home: { name: home.pt, code: home.code, flag: flag(home.code), tbd: home.tbd },
       away: { name: away.pt, code: away.code, flag: flag(away.code), tbd: away.tbd },
       score: { home: hasScore ? m.score.ft[0] : null, away: hasScore ? m.score.ft[1] : null },
     };
+    match.broadcast = getBroadcast(match);
+    return match;
   });
 
   const standings = computeStandings(matches);
   return { source: 'openfootball', matches, standings };
 }
 
-// Compute group standings from finished matches (works for both sources if needed)
 function computeStandings(matches) {
   const groups = {};
   for (const m of matches) {
@@ -286,7 +345,7 @@ function computeStandings(matches) {
 }
 
 // ============================================================
-//  Build response buckets
+//  Build response
 // ============================================================
 function buildResponse(base) {
   const matches = base.matches.slice().sort((a, b) => new Date(a.iso) - new Date(b.iso));
@@ -301,13 +360,17 @@ function buildResponse(base) {
     .slice(0, 12);
   const upcoming = matches
     .filter((m) => m.status === 'scheduled' && new Date(m.iso).getTime() >= nowMs - 3 * 3600 * 1000)
-    .slice(0, 16);
-
+    .slice(0, 20);
   const brazil = matches.filter((m) => m.home.code === 'br' || m.away.code === 'br');
+
+  // BRT clock
+  const brtNow = new Date(nowMs - 3 * 3600 * 1000);
+  const brtClock = String(brtNow.getUTCHours()).padStart(2, '0') + ':' + String(brtNow.getUTCMinutes()).padStart(2, '0');
 
   return {
     source: base.source,
     updatedAt: new Date().toISOString(),
+    brtClock,
     counts: { total: matches.length, live: live.length, today: today.length, finished: recent.length },
     live, today, recent, upcoming, brazil,
     standings: base.standings,
@@ -318,19 +381,22 @@ function buildResponse(base) {
 // ============================================================
 //  Handler
 // ============================================================
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
 
   if (cache.data && Date.now() - cache.ts < CACHE_TTL) {
-    return res.status(200).json({ ...cache.data, cached: true });
+    // Update BRT clock even on cached response
+    const brtNow = new Date(Date.now() - 3 * 3600 * 1000);
+    const brtClock = String(brtNow.getUTCHours()).padStart(2, '0') + ':' + String(brtNow.getUTCMinutes()).padStart(2, '0');
+    return res.status(200).json({ ...cache.data, brtClock, cached: true });
   }
 
   let base = null;
   try {
-    base = await fetchFootballData(); // null if no key
+    base = await fetchFootballData();
   } catch (e) {
     console.error('[scores] football-data failed:', e.message);
   }
@@ -339,11 +405,11 @@ module.exports = async (req, res) => {
       base = await fetchOpenfootball();
     } catch (e) {
       console.error('[scores] openfootball failed:', e.message);
-      return res.status(200).json({ source: 'none', error: true, live: [], today: [], recent: [], upcoming: [], brazil: [], standings: [], matches: [], updatedAt: new Date().toISOString() });
+      return res.status(200).json({ source: 'none', error: true, brtClock: '--:--', live: [], today: [], recent: [], upcoming: [], brazil: [], standings: [], matches: [], updatedAt: new Date().toISOString() });
     }
   }
 
   const result = buildResponse(base);
   cache = { data: result, ts: Date.now() };
   return res.status(200).json({ ...result, cached: false });
-};
+}
