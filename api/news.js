@@ -250,8 +250,21 @@ function validateImageUrl(url) {
   if (!url) return null;
   if (typeof url !== 'string') return null;
   if (!url.startsWith('http')) return null;
-  // Block tiny tracking pixels and broken patterns
+  // Block tracking pixels, tiny images, and broken patterns
   if (url.includes('1x1') || url.includes('pixel') || url.includes('tracker')) return null;
+  if (url.includes('spacer') || url.includes('blank.gif') || url.includes('clear.gif')) return null;
+  // Block Google News proxy thumbnails that often fail
+  if (url.includes('news.google.com/api/attachments') && url.length > 500) return null;
+  // Block very short data URIs or base64 noise
+  if (url.startsWith('data:')) return null;
+  // Must look like an image URL or a CDN path
+  const ext = url.split('?')[0].split('#')[0].toLowerCase();
+  const hasImageExt = /\.(jpg|jpeg|png|webp|gif|avif|svg)$/i.test(ext);
+  const isKnownCDN = url.includes('unsplash') || url.includes('imgur') || url.includes('cloudinary') ||
+    url.includes('wp-content') || url.includes('s3.') || url.includes('cdn') || url.includes('img') ||
+    url.includes('image') || url.includes('photo') || url.includes('media') || url.includes('static') ||
+    url.includes('thumb') || url.includes('upload');
+  if (!hasImageExt && !isKnownCDN) return null;
   return url;
 }
 
@@ -301,7 +314,7 @@ function wordOverlap(a, b) {
 // ============================================================
 //  Handler
 // ============================================================
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -371,4 +384,4 @@ module.exports = async (req, res) => {
 
   cache = { data: result, ts: Date.now() };
   return res.status(200).json(result);
-};
+}
